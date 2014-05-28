@@ -84,8 +84,8 @@ function scene:hide( event )
 		--
 		-- INSERT code here to pause the scene
 		-- e.g. stop timers, stop animation, unload sounds, etc.)
-		-- audio.play (backgroundsnd, { loops = 1})
-		-- audio.setVolume(0.2, {backgroundsnd} )
+		audio.play (backgroundsnd, { loops = 1})
+		audio.setVolume(0.2, {backgroundsnd} )
 	elseif phase == "did" then
 		-- Called when the scene is now off screen
 	end	
