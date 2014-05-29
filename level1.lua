@@ -15,6 +15,22 @@ physics.start(); physics.pause()
 
 -- forward declarations and other locals
 local screenW, screenH, halfW = display.contentWidth, display.contentHeight, display.contentWidth*0.5
+local numBullets = 99999999999
+
+function shoot(event)
+	
+	if (numBullets ~= 0) then
+		numBullets = numBullets - 1
+		local bullet = display.newImage("/images/tiro1.png")
+		physics.addBody(bullet, "static", {density = 1, friction = 0, bounce = 0});
+		bullet.x = ship.x 
+		bullet.y = ship.y 
+		bullet.myName = "bullet"
+		transition.to ( bullet, { time = 1000, x = ship.x, y =-100} )
+		audio.play(shot)
+	end 
+	
+end
 
 function scene:create( event )
 
@@ -25,14 +41,14 @@ function scene:create( event )
 
 	local sceneGroup = self.view
 	-- display a background image
-	local background = display.newImageRect( "/images/fundo1.png", display.contentWidth, display.contentHeight )
+	local background = display.newImage( "/images/fundo1.png")
 	background.anchorX = 0
 	background.anchorY = 0
 	background.x, background.y = 0, 0
 	background:setFillColor( .5 )
 	
 	-- make a meteoro (off-screen), position it, and rotate slightly
-	local meteoro = display.newImageRect( "/images/meteoro1.png", 90, 90 )
+	local meteoro = display.newImage( "/images/meteoro1.png")
 	meteoro.x, meteoro.y = 160, -100
 	meteoro.rotation = 15
 	
@@ -45,6 +61,9 @@ function scene:create( event )
 	botao.anchorY = 400
 	botao.x, botao.y = 200, 0
 	
+	-- make a nave (off-screen), position it
+	local nave1 = display.newImage( "/images/nave1.png")
+	nave1.x, nave1.y = 40, 100
 	
 	-- all display objects must be inserted into group
 	sceneGroup:insert( background )
