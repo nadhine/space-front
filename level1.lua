@@ -10,65 +10,202 @@ local scene = composer.newScene()
 -- include Corona's "physics" library
 local physics = require "physics"
 physics.start(); physics.pause()
-
+physics.setGravity(-5, 0)
 --------------------------------------------
 
--- forward declarations and other locals
-local screenW, screenH, halfW = display.contentWidth, display.contentHeight, display.contentWidth*0.5
-local numBullets = 99999999999
-
-function shoot(event)
-	
-	if (numBullets ~= 0) then
-		numBullets = numBullets - 1
-		local bullet = display.newImage("/images/tiro1.png")
-		physics.addBody(bullet, "static", {density = 1, friction = 0, bounce = 0});
-		bullet.x = ship.x 
-		bullet.y = ship.y 
-		bullet.myName = "bullet"
-		transition.to ( bullet, { time = 1000, x = ship.x, y =-100} )
-		audio.play(shot)
-	end 
-	
-end
 
 function scene:create( event )
+-- Hide status bar, so it won't keep covering our game objects
 
-	-- Called when the scene's view does not exist.
-	-- 
-	-- INSERT code here to initialize the scene
-	-- e.g. add display objects to 'sceneGroup', add touch listeners, etc.
+-- A heavier gravity, so enemies planes fall faster
+-- !! Note: there are a thousand better ways of doing the enemies movement,
+-- but I'm going with gravity for the sake of simplicity. !!
 
-	local sceneGroup = self.view
-	-- display a background image
-	local background = display.newImage( "/images/fundo1.png")
-	background.anchorX = 0
-	background.anchorY = 0
-	background.x, background.y = 0, 0
-	background:setFillColor( .5 )
+
+-- Layers (Groups). Think as Photoshop layers: you can order things with Corona groups,
+-- as well have display objects on the same group render together at once. 
+local gameLayer    = display.newGroup()
+local bulletsLayer = display.newGroup()
+local enemiesLayer = display.newGroup()
+
+-- Declare variables
+local gameIsActive = true
+local scoreText
+local sounds
+local score = 0
+local toRemove = {}
+local background
+local player
+local halfPlayerWidth
+
+-- Keep the texture for the enemy and bullet on memory, so Corona doesn't load them everytime
+local textureCache = {}
+textureCache[1] = display.newImage("/images/meteoro1.png"); textureCache[1].isVisible = false;
+textureCache[2] = display.newImage("/images/tiro1.png");  textureCache[2].isVisible = false;
+local halfEnemyWidth = textureCache[1].contentWidth * .5
+
+-- Adjust the volume
+audio.setMaxVolume( 0.5, { channel=1 } )
+
+-- Pre-load our sounds
+sounds = {
+	pew = audio.loadSound("audio/pew.wav"),
+	boom = audio.loadSound("audio/boom.wav"),
+	gameOver = audio.loadSound("audio/gameOver.wav")
+}
+
+-- display a background image
+local background = display.newImage( "/images/fundo1.png")
+background.anchorX = 0
+background.anchorY = 0
+background.x, background.y = 0, 0
+background:setFillColor( .5 )
+gameLayer:insert(background)
+
+-- Order layers (background was already added, so add the bullets, enemies, and then later on
+-- the player and the score will be added - so the score will be kept on top of everything)
+gameLayer:insert(bulletsLayer)
+gameLayer:insert(enemiesLayer)
+
+-- Take care of collisions
+local function onCollision(self, event)
+	-- Bullet hit enemy
+	if self.name == "bullet" and event.other.name == "enemy" and gameIsActive then
+		-- Increase score
+		score = score + 1
+		scoreText.text = score
+		
+		-- Play Sound
+		audio.play(sounds.boom)
+		
+		-- We can't remove a body inside a collision event, so queue it to removal.
+		-- It will be removed on the next frame inside the game loop.
+		table.insert(toRemove, event.other)
 	
-	-- make a meteoro (off-screen), position it, and rotate slightly
-	local meteoro = display.newImage( "/images/meteoro1.png")
-	meteoro.x, meteoro.y = 160, -100
-	meteoro.rotation = 15
+	-- Player collision - GAME OVER	
+	elseif self.name == "player" and event.other.name == "enemy" then
+		audio.play(sounds.gameOver)
+		
+		local gameoverText = display.newText("Game Over!", 0, 0, nil, 35)
+		gameoverText.x = display.contentCenterX
+		gameoverText.y = display.contentCenterY
+		gameLayer:insert(gameoverText)
+		
+		-- This will stop the gameLoop
+		gameIsActive = false
+	end
+end
+
+-- Load and position the player
+player = display.newImage("/images/nave1.png")
+player.y = display.contentCenterY
+player.x = 30
+
+-- Add a physics body. It is kinematic, so it doesn't react to gravity.
+physics.addBody(player, "kinematic", {bounce = 0})
+
+-- This is necessary so we know who hit who when taking care of a collision event
+player.name = "player"
+
+-- Listen to collisions
+player.collision = onCollision
+player:addEventListener("collision", player)
+
+-- Add to main layer
+gameLayer:insert(player)
+
+-- Store half width, used on the game loop
+halfPlayerWidth = player.contentWidth * .5
+
+-- Show the score
+scoreText = display.newText(score, 0, 0, nil, 35)
+scoreText.x = 30
+scoreText.y = 25
+gameLayer:insert(scoreText)
+
+--------------------------------------------------------------------------------
+-- Game loop
+--------------------------------------------------------------------------------
+local timeLastBullet, timeLastEnemy = 0, 0
+local bulletInterval = 1000
+
+local function gameLoop(event)
+	if gameIsActive then
+		-- Remove collided enemy planes
+		for i = 1, #toRemove do
+			toRemove[i].parent:remove(toRemove[i])
+			toRemove[i] = nil
+		end
 	
-	-- add physics to the meteoro
-	physics.addBody( meteoro, { density=1.0, friction=0.3, bounce=0.3 } )
+		-- Check if it's time to spawn another enemy,
+		-- based on a random range and last spawn (timeLastEnemy)
+		if event.time - timeLastEnemy >= math.random(600, 1000) then
+			-- Randomly position it on the top of the screen
+			local enemy = display.newImage("/images/meteoro1.png")
+			enemy.x = display.contentWidth + enemy.contentHeight
+			enemy.y = math.random(0, display.contentHeight)
+
+			-- This has to be dynamic, making it react to gravity, so it will
+			-- fall to the bottom of the screen.
+			physics.addBody(enemy, "dynamic", {bounce = 0})
+			enemy.name = "enemy"
+			
+			enemiesLayer:insert(enemy)
+			timeLastEnemy = event.time
+		end
 	
-	-- create a botao object and add physics (with custom shape)
-	local botao = display.newImageRect( "/images/botao.png", 80, 80 )
-	botao.anchorX = 200
-	botao.anchorY = 400
-	botao.x, botao.y = 200, 0
+		-- Spawn a bullet
+		if event.time - timeLastBullet >= math.random(250, 300) then
+			local bullet = display.newImage("images/tiro1.png")
+			bullet.x = player.x + player.contentWidth/2
+			bullet.y = player.y
+		
+			-- Kinematic, so it doesn't react to gravity.
+			physics.addBody(bullet, "kinematic", {bounce = 0})
+			bullet.name = "bullet"
+			
+			-- Listen to collisions, so we may know when it hits an enemy.
+			bullet.collision = onCollision
+			bullet:addEventListener("collision", bullet)
+		
+			gameLayer:insert(bullet)
+			
+			-- Pew-pew sound!
+			audio.play(sounds.pew)
+			
+			-- Move it to the top.
+			-- When the movement is complete, it will remove itself: the onComplete event
+			-- creates a function to will store information about this bullet and then remove it.
+			transition.to(bullet, {time = 1000, x = display.contentWidth - bullet.contentHeight,
+				onComplete = function(self) self.parent:remove(self); self = nil; end
+			})
+						
+			timeLastBullet = event.time
+		end
+	end
+end
+
+-- Call the gameLoop function EVERY frame,
+-- e.g. gameLoop() will be called 30 times per second ir our case.
+Runtime:addEventListener("enterFrame", gameLoop)
+
+--------------------------------------------------------------------------------
+-- Basic controls
+--------------------------------------------------------------------------------
+local function playerMovement(event)
+	-- Doesn't respond if the game is ended
+	if not gameIsActive then return false end
 	
-	-- make a nave (off-screen), position it
-	local nave1 = display.newImage( "/images/nave1.png")
-	nave1.x, nave1.y = 40, 100
+	-- Only move to the screen boundaries
+	if event.y >= 0 or event.y <= display.contentHeight then
+		-- Update player x axis
+		player.y = event.y
+	end
+end
+
+-- Player will listen to touches
+player:addEventListener("touch", playerMovement)
 	
-	-- all display objects must be inserted into group
-	sceneGroup:insert( background )
-	sceneGroup:insert( botao)
-	sceneGroup:insert( meteoro )
 end
 
 
