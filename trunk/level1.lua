@@ -40,8 +40,8 @@ local halfPlayerWidth
 
 -- Keep the texture for the enemy and bullet on memory, so Corona doesn't load them everytime
 local textureCache = {}
-textureCache[1] = display.newImage("/images/meteoro1.png"); textureCache[1].isVisible = false;
-textureCache[2] = display.newImage("/images/tiro1.png");  textureCache[2].isVisible = false;
+textureCache[1] = display.newImage("images/meteoro1.png"); textureCache[1].isVisible = false;
+textureCache[2] = display.newImage("images/tiro1.png");  textureCache[2].isVisible = false;
 local halfEnemyWidth = textureCache[1].contentWidth * .5
 
 -- Adjust the volume
@@ -55,7 +55,7 @@ sounds = {
 }
 
 -- display a background image
-local background = display.newImage( "/images/fundo1.png")
+local background = display.newImage( "images/fundo1.png")
 background.anchorX = 0
 background.anchorY = 0
 background.x, background.y = 0, 0
@@ -97,7 +97,7 @@ local function onCollision(self, event)
 end
 
 -- Load and position the player
-player = display.newImage("/images/nave1.png")
+player = display.newImage("images/nave1.png")
 player.y = display.contentCenterY
 player.x = 30
 
@@ -141,7 +141,7 @@ local function gameLoop(event)
 		-- based on a random range and last spawn (timeLastEnemy)
 		if event.time - timeLastEnemy >= math.random(600, 1000) then
 			-- Randomly position it on the top of the screen
-			local enemy = display.newImage("/images/meteoro1.png")
+			local enemy = display.newImage("images/meteoro1.png")
 			enemy.x = display.contentWidth + enemy.contentHeight
 			enemy.y = math.random(0, display.contentHeight)
 
