@@ -14,7 +14,7 @@ local widget = require "widget"
 
 -- forward declarations and other locals
 local playBtn
-local backgroundsnd = audio.loadStream ( "/audio/bgMusic.mp3")
+local backgroundsnd = audio.loadStream ( "audio/bgMusic.mp3")
 
 -- 'onRelease' event listener for playBtn
 local function onPlayBtnRelease()
@@ -34,13 +34,13 @@ function scene:create( event )
 	-- e.g. add display objects to 'sceneGroup', add touch listeners, etc.
 
 	-- display a background image
-	local background = display.newImageRect( "/images/fundo1.png", display.contentWidth, display.contentHeight )
+	local background = display.newImageRect( "images/fundo1.png", display.contentWidth, display.contentHeight )
 	background.anchorX = 0
 	background.anchorY = 0
 	background.x, background.y = 0, 0
 	
 	-- create/position logo/title image on upper-half of the screen
-	local titleLogo = display.newImageRect( "/images/logo.png", 264, 42 )
+	local titleLogo = display.newImageRect( "images/logo.png", 264, 42 )
 	titleLogo.x = display.contentWidth * 0.5
 	titleLogo.y = 100
 	
