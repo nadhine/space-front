@@ -97,8 +97,7 @@ local function onCollision(self, event)
 end
 
 -- Load and position the player
-player = display.newImage("images/nave1.png")
-player.y = display.contentCenterY
+player = display.newImageRect("images/nave1.png",80,30)player.y = display.contentCenterY
 player.x = 30
 
 -- Add a physics body. It is kinematic, so it doesn't react to gravity.
