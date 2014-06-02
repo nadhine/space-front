@@ -27,6 +27,7 @@ function scene:create( event )
 local gameLayer    = display.newGroup()
 local bulletsLayer = display.newGroup()
 local enemiesLayer = display.newGroup()
+local barrierLayer = display.newGroup()
 
 -- Declare variables
 local gameIsActive = true
@@ -42,6 +43,7 @@ local halfPlayerWidth
 local textureCache = {}
 textureCache[1] = display.newImage("images/meteoro1.png"); textureCache[1].isVisible = false;
 textureCache[2] = display.newImage("images/tiro1.png");  textureCache[2].isVisible = false;
+textureCache[3] = display.newImage("images/inimigo1-1b.png");  textureCache[3].isVisible = false;
 local halfEnemyWidth = textureCache[1].contentWidth * .5
 
 -- Adjust the volume
@@ -66,13 +68,14 @@ gameLayer:insert(background)
 -- the player and the score will be added - so the score will be kept on top of everything)
 gameLayer:insert(bulletsLayer)
 gameLayer:insert(enemiesLayer)
+gameLayer:insert(barrierLayer)
 
 -- Take care of collisions
 local function onCollision(self, event)
 	-- Bullet hit enemy
 	if self.name == "bullet" and event.other.name == "enemy" and gameIsActive then
 		-- Increase score
-		score = score + 1
+		score = score + 3
 		scoreText.text = score
 		
 		-- Play Sound
@@ -83,7 +86,7 @@ local function onCollision(self, event)
 		table.insert(toRemove, event.other)
 	
 	-- Player collision - GAME OVER	
-	elseif self.name == "player" and event.other.name == "enemy" then
+	elseif self.name == "player" and event.other.name == "enemy" or self.name == "player" and event.other.name == "barrier" then
 		audio.play(sounds.gameOver)
 		
 		local gameoverText = display.newText("Game Over!", 0, 0, nil, 35)
@@ -93,6 +96,17 @@ local function onCollision(self, event)
 		
 		-- This will stop the gameLoop
 		gameIsActive = false
+	elseif self.name == "bullet" and event.other.name == "barrier" and gameIsActive then
+	-- Increase score
+		score = score + 1
+		scoreText.text = score
+		
+		-- Play Sound
+		audio.play(sounds.boom)
+		
+		-- We can't remove a body inside a collision event, so queue it to removal.
+		-- It will be removed on the next frame inside the game loop.
+		table.insert(toRemove, event.other)
 	end
 end
 
@@ -140,16 +154,16 @@ local function gameLoop(event)
 		-- based on a random range and last spawn (timeLastEnemy)
 		if event.time - timeLastEnemy >= math.random(600, 1000) then
 			-- Randomly position it on the top of the screen
-			local enemy = display.newImage("images/meteoro1.png")
-			enemy.x = display.contentWidth + enemy.contentHeight
-			enemy.y = math.random(0, display.contentHeight)
+			local barrier = display.newImage("images/meteoro1.png")
+			barrier.x = display.contentWidth + barrier.contentHeight
+			barrier.y = math.random(0, display.contentHeight)
 
 			-- This has to be dynamic, making it react to gravity, so it will
 			-- fall to the bottom of the screen.
-			physics.addBody(enemy, "dynamic", {bounce = 0})
-			enemy.name = "enemy"
+			physics.addBody(barrier, "dynamic", {bounce = 0})
+			barrier.name = "enemy"
 			
-			enemiesLayer:insert(enemy)
+			enemiesLayer:insert(barrier)
 			timeLastEnemy = event.time
 		end
 	
@@ -181,6 +195,23 @@ local function gameLoop(event)
 						
 			timeLastBullet = event.time
 		end
+		if event.time - timeLastEnemy >= math.random(600, 1000) then
+			-- Randomly position it on the top of the screen
+			local enemy = display.newImage("images/inimigo1-1b.png")
+			enemy.x = display.contentWidth + enemy.contentHeight
+			enemy.y = math.random(0, display.contentHeight)
+
+			-- This has to be dynamic, making it react to gravity, so it will
+			-- fall to the bottom of the screen.
+			physics.addBody(enemy, "dynamic", {bounce = 0})
+			enemy.name = "enemy"
+			
+			enemiesLayer:insert(enemy)
+			timeLastEnemy = event.time
+			
+		end
+	
+
 	end
 end
 
