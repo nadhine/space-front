@@ -40,6 +40,15 @@ local background
 local player
 local halfPlayerWidth
 
+local landscape_1 = display.newImageRect( "images/fase1.png", 3963, 320 )
+
+-- landscape:setReferencePoint( display.TopLeftReferencePoint )
+landscape_1.anchorX = 0
+landscape_1.anchorY = 0
+landscape_1.x = 0
+landscape_1.y = 0
+
+
 -- Keep the texture for the enemy and bullet on memory, so Corona doesn't load them everytime
 local textureCache = {}
 textureCache[1] = display.newImage("images/meteoro1.png"); textureCache[1].isVisible = false;
@@ -58,12 +67,8 @@ sounds = {
 }
 
 -- display a background image
-local background = display.newImage( "images/fundo1.png")
-background.anchorX = 0
-background.anchorY = 0
-background.x, background.y = 0, 0
-background:setFillColor( .5 )
-gameLayer:insert(background)
+gameLayer:insert(landscape_1)
+
 
 -- Order layers (background was already added, so add the bullets, enemies, and then later on
 -- the player and the score will be added - so the score will be kept on top of everything)
@@ -71,9 +76,14 @@ gameLayer:insert(bulletsLayer)
 gameLayer:insert(enemiesLayer)
 gameLayer:insert(barrierLayer)
 
-audio.play (backgroundsnd, { loops = 1})
+audio.play (backgroundsnd, { loops = 3})
 audio.setVolume(0.2, {backgroundsnd} )
--- Take care of collisions
+
+ local function reset_landscape( landscape )
+	landscape.x = 0
+	transition.to( landscape, {x=0-3963+480, time=30000, onComplete=reset_landscape} )
+end
+
 local function onCollision(self, event)
 	-- Bullet hit enemy
 	if self.name == "bullet" and event.other.name == "enemy" and gameIsActive then
@@ -139,6 +149,7 @@ scoreText.x = 30
 scoreText.y = 25
 gameLayer:insert(scoreText)
 
+reset_landscape( landscape_1 )
 --------------------------------------------------------------------------------
 -- Game loop
 --------------------------------------------------------------------------------
@@ -147,6 +158,7 @@ local bulletInterval = 1000
 
 local function gameLoop(event)
 	if gameIsActive then
+		
 		-- Remove collided enemy planes
 		for i = 1, #toRemove do
 			toRemove[i].parent:remove(toRemove[i])
@@ -221,6 +233,8 @@ end
 -- e.g. gameLoop() will be called 30 times per second ir our case.
 Runtime:addEventListener("enterFrame", gameLoop)
 
+-- Create a runtime event to move backgrounds
+-- Runtime:addEventListener( "enterFrame", move )
 --------------------------------------------------------------------------------
 -- Basic controls
 --------------------------------------------------------------------------------
