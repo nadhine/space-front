@@ -6,6 +6,7 @@
 
 local composer = require( "composer" )
 local scene = composer.newScene()
+local backgroundsnd = audio.loadStream ( "audio/bgMusic.mp3")
 
 -- include Corona's "physics" library
 local physics = require "physics"
@@ -70,6 +71,8 @@ gameLayer:insert(bulletsLayer)
 gameLayer:insert(enemiesLayer)
 gameLayer:insert(barrierLayer)
 
+audio.play (backgroundsnd, { loops = 1})
+audio.setVolume(0.2, {backgroundsnd} )
 -- Take care of collisions
 local function onCollision(self, event)
 	-- Bullet hit enemy
@@ -149,7 +152,6 @@ local function gameLoop(event)
 			toRemove[i].parent:remove(toRemove[i])
 			toRemove[i] = nil
 		end
-	
 		-- Check if it's time to spawn another enemy,
 		-- based on a random range and last spawn (timeLastEnemy)
 		if event.time - timeLastEnemy >= math.random(600, 1000) then
@@ -278,7 +280,7 @@ function scene:destroy( event )
 	-- INSERT code here to cleanup the scene
 	-- e.g. remove display objects, remove touch listeners, save state, etc.
 	local sceneGroup = self.view
-	
+	audio.stop (backgroundsnd)
 	package.loaded[physics] = nil
 	physics = nil
 end
