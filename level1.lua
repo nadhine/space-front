@@ -243,7 +243,7 @@ local function playerMovement(event)
 	if not gameIsActive then return false end
 	
 	-- Only move to the screen boundaries
-	if event.y >= 0 or event.y <= display.contentHeight then
+	if event.y >= player.height and event.y <= display.contentHeight-player.height then
 		-- Update player x axis
 		player.y = event.y
 	end
