@@ -14,7 +14,7 @@ local widget = require "widget"
 
 -- forward declarations and other locals
 local playBtn
-local backgroundsnd = audio.loadStream ( "audio/bgMusic.mp3")
+local backgroundsnd = audio.loadStream ( "audio/POL-evil-throne-short.wav")
 
 -- 'onRelease' event listener for playBtn
 local function onPlayBtnRelease()
@@ -43,6 +43,9 @@ function scene:create( event )
 	local titleLogo = display.newImageRect( "images/logo.png", 264, 42 )
 	titleLogo.x = display.contentWidth * 0.5
 	titleLogo.y = 100
+	
+	audio.play (backgroundsnd, { loops = 1})
+	audio.setVolume(0.2, {backgroundsnd} )
 	
 	-- create a widget button (which will loads level1.lua on release)
 	playBtn = widget.newButton{
@@ -84,8 +87,7 @@ function scene:hide( event )
 		--
 		-- INSERT code here to pause the scene
 		-- e.g. stop timers, stop animation, unload sounds, etc.)
-		audio.play (backgroundsnd, { loops = 1})
-		audio.setVolume(0.2, {backgroundsnd} )
+		audio.stop()
 	elseif phase == "did" then
 		-- Called when the scene is now off screen
 	end	
@@ -98,7 +100,7 @@ function scene:destroy( event )
 	-- 
 	-- INSERT code here to cleanup the scene
 	-- e.g. remove display objects, remove touch listeners, save state, etc.
-	audio.stop (backgroundsnd)
+	audio.stop()
 	if playBtn then
 		playBtn:removeSelf()	-- widgets must be manually removed
 		playBtn = nil
