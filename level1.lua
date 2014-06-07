@@ -144,8 +144,8 @@ gameLayer:insert(player)
 halfPlayerWidth = player.contentWidth * .5
 
 -- Show the score
-scoreText = display.newText(score, 0, 0, nil, 35)
-scoreText.x = 30
+scoreText = display.newText(score, 0, 0, nil, 25)
+scoreText.x = 430
 scoreText.y = 25
 gameLayer:insert(scoreText)
 
@@ -175,7 +175,7 @@ local function gameLoop(event)
 			-- This has to be dynamic, making it react to gravity, so it will
 			-- fall to the bottom of the screen.
 			physics.addBody(barrier, "dynamic", {bounce = 0})
-			barrier.name = "enemy"
+			barrier.name = "barrier"
 			
 			enemiesLayer:insert(barrier)
 			timeLastEnemy = event.time
