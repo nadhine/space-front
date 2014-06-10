@@ -25,6 +25,14 @@ local function onPlayBtnRelease()
 	return true	-- indicates successful touch
 end
 
+local function aboutBtnRelease()
+	
+	-- go to about.lua scene
+	composer.gotoScene( "about", "fade", 500 )
+	
+	return true	-- indicates successful touch
+end
+
 function scene:create( event )
 	local sceneGroup = self.view
 
@@ -45,7 +53,7 @@ function scene:create( event )
 	titleLogo.y = 100
 	
 	audio.play (backgroundsnd, { loops = 1})
-	audio.setVolume(0.2, {backgroundsnd} )
+	audio.setVolume(0.1, {backgroundsnd} )
 	
 	-- create a widget button (which will loads level1.lua on release)
 	playBtn = widget.newButton{
@@ -55,13 +63,35 @@ function scene:create( event )
 		width=154, height=40,
 		onRelease = onPlayBtnRelease	-- event listener function
 	}
-	playBtn.x = display.contentWidth*0.5
-	playBtn.y = display.contentHeight - 125
+	playBtn.x = 100
+	playBtn.y = 200
+	
+	multiPlayBtn = widget.newButton{
+	labelColor = { default={255}, over={128} },
+	defaultFile="images/2playersbtn.png",
+	overFile="images/2playersbtnover.png",
+	width=154, height=40,
+	onRelease = onPlayBtnRelease	-- event listener function
+	}
+	multiPlayBtn.x =  100
+	multiPlayBtn.y =  270
+	
+	aboutBtn = widget.newButton{
+	labelColor = { default={255}, over={128} },
+	defaultFile="images/about.png",
+	overFile="images/about.png",
+	width=200, height=147,
+	onRelease = aboutBtnRelease	-- event listener function
+	}
+	aboutBtn.x =  380
+	aboutBtn.y =  200
 	
 	-- all display objects must be inserted into group
 	sceneGroup:insert( background )
 	sceneGroup:insert( titleLogo )
 	sceneGroup:insert( playBtn )
+	sceneGroup:insert(multiPlayBtn)
+	sceneGroup:insert(aboutBtn)
 end
 
 function scene:show( event )
