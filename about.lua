@@ -31,7 +31,7 @@ function scene:create( event )
 	local titleLogo = display.newImageRect( "images/logo.png", 264, 42 )
 	titleLogo.x = display.contentWidth * 0.5
 	titleLogo.y = 100
-	aboutText = display.newText(" O jogo se passa em 2045 em um tempo de muita evolução tecnológica", 0, 0, nil, 12)
+	aboutText = display.newText(" O jogo se passa em 2045 em um tempo de muita evolução tecnológica...", 0, 0, nil, 11)
 	aboutText.x = 200
 	aboutText.y = 250
 	

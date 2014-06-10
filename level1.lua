@@ -40,6 +40,7 @@ local toRemove = {}
 local background
 local player
 local halfPlayerWidth
+local resist = 0
 
 local landscape_1 = display.newImageRect( "images/fase1.png", 3963, 320 )
 
@@ -87,6 +88,15 @@ audio.setVolume(0.1, {backgroundsnd} )
 	transition.to( landscape, {x=0-3963+480, time=30000, onComplete=reset_landscape} )
 end
 
+local function gameover()
+	audio.play(sounds.gameOver)
+	
+	local gameoverText = display.newText("Game Over!", 0, 0, nil, 35)
+	gameoverText.x = display.contentCenterX
+	gameoverText.y = display.contentCenterY
+	gameLayer:insert(gameoverText)
+end
+
 local function onCollision(self, event)
 	-- Bullet hit enemy
 	if self.name == "bullet" and event.other.name == "enemy" and gameIsActive then
@@ -113,13 +123,12 @@ local function onCollision(self, event)
 		
 	-- Player collision - GAME OVER	
 	elseif self.name == "player" and event.other.name == "enemy" or self.name == "player" and event.other.name == "barrier" then
-		audio.play(sounds.gameOver)
-		
-		local gameoverText = display.newText("Game Over!", 0, 0, nil, 35)
-		gameoverText.x = display.contentCenterX
-		gameoverText.y = display.contentCenterY
-		gameLayer:insert(gameoverText)
-		
+		gameover()		
+		-- This will stop the gameLoop
+		gameIsActive = false
+	end
+	if self.name == "Ebullet" and event.other.name == "player" then
+		gameover()			
 		-- This will stop the gameLoop
 		gameIsActive = false
 	end
@@ -154,8 +163,8 @@ halfPlayerWidth = 0
 enemy = display.newImageRect("images/inimigo1-1b.png",30,30)
 enemy.y = 100
 enemy.x = 450
--- Add a physics body. It is kinematic, so it doesn't react to gravity.
-physics.addBody(enemy, "dynamic", {bounce = 0})
+-- Add a physics body. It is kinematic, so it doesn't react to gravity .....
+physics.addBody(enemy, "dynamic", {density=10, bounce = 0})
 -- This is necessary so we know who hit who when taking care of a collision event
 enemy.name = "enemy"
 -- Listen to collisions
@@ -239,7 +248,7 @@ local function gameLoop(event)
 			Ebullet.y = enemy.y
 		
 			-- Kinematic, so it doesn't react to gravity.
-			physics.addBody(Ebullet, "kinematic", {bounce = 0})
+			physics.addBody(Ebullet, "dynamic", {bounce = 0})
 			Ebullet.name = "Ebullet"
 			
 			-- Listen to collisions, so we may know when it hits an enemy.
