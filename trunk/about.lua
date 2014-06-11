@@ -53,6 +53,7 @@ function scene:create( event )
 	sceneGroup:insert( background )
 	sceneGroup:insert( titleLogo )
 	sceneGroup:insert( backBtn )
+	sceneGroup:insert( aboutText )
 end
 
 function scene:show( event )
@@ -66,20 +67,15 @@ function scene:show( event )
 		-- 
 		-- INSERT code here to make the scene come alive
 		-- e.g. start timers, begin animation, play audio, etc.
+		audio.play (backgroundsnd, { loops = 1})
+		sceneGroup.isVisible = true
 	end	
 end
 
 function scene:hide( event )
 	local sceneGroup = self.view
 	audio.stop()
-	if aboutText then
-		aboutText:removeSelf()
-		aboutText = nil
-	end
-	if backBtn then
-		backBtn:removeSelf()	-- widgets must be manually removed
-		backBtn = nil
-	end
+	sceneGroup.isVisible = false
 end
 
 function scene:destroy( event )
