@@ -105,6 +105,8 @@ function scene:show( event )
 		-- 
 		-- INSERT code here to make the scene come alive
 		-- e.g. start timers, begin animation, play audio, etc.
+		audio.play (backgroundsnd, { loops = 1})
+		sceneGroup.isVisible = true
 	end	
 end
 
@@ -116,8 +118,9 @@ function scene:hide( event )
 		-- Called when the scene is on screen and is about to move off screen
 		--
 		-- INSERT code here to pause the scene
-		-- e.g. stop timers, stop animation, unload sounds, etc.)
+		-- e.g. stop timers, stop animation, unload sounds, etc.
 		audio.stop()
+		sceneGroup.isVisible = false
 	elseif phase == "did" then
 		-- Called when the scene is now off screen
 	end	
@@ -131,10 +134,7 @@ function scene:destroy( event )
 	-- INSERT code here to cleanup the scene
 	-- e.g. remove display objects, remove touch listeners, save state, etc.
 	audio.stop()
-	if playBtn then
-		playBtn:removeSelf()	-- widgets must be manually removed
-		playBtn = nil
-	end
+	sceneGroup:removeSelf()
 end
 
 ---------------------------------------------------------------------------------
