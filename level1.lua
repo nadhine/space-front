@@ -10,6 +10,8 @@ local storyboard = require "storyboard"
 local composer = require( "composer" )
 local scene = composer.newScene()
 
+-- include functions pubnub
+require ("multiplayerFunctions");
 -- include Corona's "widget" library
 local widget = require "widget"
 
@@ -335,7 +337,10 @@ function scene:create( event )
 		-- Only move to the screen boundaries
 		if event.y >= player.height and event.y <= display.contentHeight-player.height then
 			-- Update player x axis
-			player.y = event.y +5
+			player.y = event.y + 5
+			local teste = generateId();
+			print( teste );
+
 		end
 	end
 
