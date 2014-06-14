@@ -9,6 +9,9 @@ local widget = require "widget"
 local storyboard = require "storyboard"
 local composer = require( "composer" )
 local scene = composer.newScene()
+
+-- include functions pubnub
+require ("multiplayerFunctions");
 -- include Corona's "widget" library
 local widget = require "widget"
 local backgroundsnd = audio.loadStream ( "audio/bgMusic.mp3")
@@ -334,6 +337,9 @@ function scene:create( event )
 		if event.y >= player.height and event.y <= display.contentHeight-player.height then
 			-- Update player x axis
 			player.y = event.y + 5
+			local teste = generateId();
+			print( teste );
+
 		end
 	end
 

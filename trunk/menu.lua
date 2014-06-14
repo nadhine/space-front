@@ -25,6 +25,13 @@ local function onPlayBtnRelease()
 	return true	-- indicates successful touch
 end
 
+local function multiPlayBtnRelease()
+	-- go to level1multi.lua scene
+	composer.gotoScene( "level1multi", "fade", 500 )
+	
+	return true	-- indicates successful touch
+end
+
 local function aboutBtnRelease()
 	
 	-- go to about.lua scene
@@ -71,7 +78,7 @@ function scene:create( event )
 	defaultFile="images/2playersbtn.png",
 	overFile="images/2playersbtnover.png",
 	width=154, height=40,
-	onRelease = onPlayBtnRelease	-- event listener function
+	onRelease = multiPlayBtnRelease	-- event listener function
 	}
 	multiPlayBtn.x =  100
 	multiPlayBtn.y =  270
