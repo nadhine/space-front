@@ -14,6 +14,7 @@ local function backBtnRelease()
 end
 
 function scene:create( event )
+	print( "1: create scene about" )
 	local sceneGroup = self.view
 
 	-- Called when the scene's view does not exist.
@@ -34,11 +35,7 @@ function scene:create( event )
 	aboutText = display.newText(" O jogo se passa em 2045 em um tempo de muita evolução tecnológica...", 0, 0, nil, 11)
 	aboutText.x = 200
 	aboutText.y = 250
-	
-	audio.play (backgroundsnd, { loops = 1})
-	audio.setVolume(0.1, {backgroundsnd} )
-	
-	
+		
 	backBtn = widget.newButton{
 	labelColor = { default={255}, over={128} },
 	defaultFile="images/menubtn.png",
@@ -61,13 +58,14 @@ function scene:show( event )
 	local phase = event.phase
 	
 	if phase == "will" then
+		print( "1: show event, phase will about" )
 		-- Called when the scene is still off screen and is about to move on screen
 	elseif phase == "did" then
+		print( "1: show event, phase did about" )
 		-- Called when the scene is now on screen
 		-- 
 		-- INSERT code here to make the scene come alive
 		-- e.g. start timers, begin animation, play audio, etc.
-		audio.play (backgroundsnd, { loops = 1})
 		sceneGroup.isVisible = true
 	end	
 end
@@ -76,24 +74,11 @@ function scene:hide( event )
 	local sceneGroup = self.view
 	audio.stop()
 	sceneGroup.isVisible = false
+	print( "hide event about" )
 end
 
 function scene:destroy( event )
-	local sceneGroup = self.view
-	
-	-- Called prior to the removal of scene's "view" (sceneGroup)
-	-- 
-	-- INSERT code here to cleanup the scene
-	-- e.g. remove display objects, remove touch listeners, save state, etc.
-	audio.stop()
-	if aboutText then
-		aboutText:removeSelf()
-		aboutText = nil
-	end
-	if backBtn then
-		backBtn:removeSelf()	-- widgets must be manually removed
-		backBtn = nil
-	end
+	print( "((destroying about view))" )
 end
 
 ---------------------------------------------------------------------------------

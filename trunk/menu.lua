@@ -114,6 +114,8 @@ function scene:show( event )
 		-- e.g. start timers, begin animation, play audio, etc.
 		audio.play (backgroundsnd, { loops = 1})
 		sceneGroup.isVisible = true
+		composer.removeScene( "about" )
+		composer.removeScene( "level1" )
 	end	
 end
 
@@ -134,14 +136,11 @@ function scene:hide( event )
 end
 
 function scene:destroy( event )
-	local sceneGroup = self.view
-	
 	-- Called prior to the removal of scene's "view" (sceneGroup)
 	-- 
 	-- INSERT code here to cleanup the scene
-	-- e.g. remove display objects, remove touch listeners, save state, etc.
-	audio.stop()
-	sceneGroup:removeSelf()
+	-- e.g. remove display objects, remove touch listeners, save state, etc
+	print( "((destroying scene 1's view))" )
 end
 
 ---------------------------------------------------------------------------------

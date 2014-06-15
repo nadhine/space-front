@@ -3,34 +3,17 @@
 -- level1.lua
 --
 -----------------------------------------------------------------------------------------
--- include Corona's "widget" library
+-- include Corona's  libraries
 local widget = require "widget"
-
 local storyboard = require "storyboard"
 local composer = require( "composer" )
-local scene = composer.newScene()
--- include Corona's "widget" library
-local widget = require "widget"
-local backgroundsnd = audio.loadStream ( "audio/bgMusic.mp3")
-
--- include Corona's "physics" library
 local physics = require "physics"
-physics.start(); physics.pause()
+
+local scene = composer.newScene()
+local backgroundsnd = audio.loadStream ( "audio/bgMusic.mp3")
+physics.start()
 physics.setGravity(-5, 0)
 --------------------------------------------
-
-
-function scene:create( event )
-	local sceneGroup = self.view
-	-- Hide status bar, so it won't keep covering our game objects
-
-	-- A heavier gravity, so enemies planes fall faster
-	-- !! Note: there are a thousand better ways of doing the enemies movement,
-	-- but I'm going with gravity for the sake of simplicity. !!
-
-
-	-- Layers (Groups). Think as Photoshop layers: you can order things with Corona groups,
-	-- as well have display objects on the same group render together at once. 
 	local gameLayer    = display.newGroup()
 	local bulletsLayer = display.newGroup()
 	local enemiesLayer = display.newGroup()
@@ -49,13 +32,12 @@ function scene:create( event )
 	local resist = 0
 
 	local landscape = display.newImageRect( "images/fase1.png", 3963, 320 )
-
 	-- landscape:setReferencePoint( display.TopLeftReferencePoint )
 	landscape.anchorX = 0
 	landscape.anchorY = 0
 	landscape.x = 0
 	landscape.y = 0
-
+	gameLayer:insert(landscape)
 
 	-- Keep the texture for the enemy and bullet on memory, so Corona doesn't load them everytime
 	local textureCache = {}
@@ -67,7 +49,9 @@ function scene:create( event )
 
 	-- Adjust the volume
 	audio.setMaxVolume( 0.2, { channel=1 } )
-
+	audio.play (backgroundsnd, { loops = 3})
+	audio.setVolume(0.1, {backgroundsnd} )
+	
 	-- Pre-load our sounds
 	sounds = {
 		pew = audio.loadSound("audio/pew.wav"),
@@ -75,75 +59,24 @@ function scene:create( event )
 		gameOver = audio.loadSound("audio/gameOver.wav")
 	}
 
-	-- display a background image
-	gameLayer:insert(landscape)
-
-
 	-- Order layers (background was already added, so add the bullets, enemies, and then later on
 	-- the player and the score will be added - so the score will be kept on top of everything)
 	gameLayer:insert(bulletsLayer)
 	gameLayer:insert(enemiesLayer)
 	gameLayer:insert(barrierLayer)
 	gameLayer:insert(enemiesBulletsLayer)
-	sceneGroup:insert(gameLayer)
+	
 
-	audio.play (backgroundsnd, { loops = 3})
-	audio.setVolume(0.1, {backgroundsnd} )
-
+----paralax
 	local function reset_landscape( landscape )
 		landscape.x = 0
 		transition.to( landscape, {x=0-3963+480, time=30000, onComplete=reset_landscape} )
 	end
 
-	local function menuBtnRelease()
-		print( "menubtn" )
-		-- go to about.lua scene
-		composer.gotoScene( "menu", "fade", 500 )
-		print( "go to menu" )
-		
-		return true	-- indicates successful touch
-	end
-	
-	local function restartBtnRelease()
-		-- go to about.lua scene
-		composer.gotoScene( "level1", "fade", 500 )	
-		return true	-- indicates successful touch
-	end
-
 	local function gameover()
 		audio.play(sounds.gameOver)
-		
-		local gameoverText = display.newText("Game Over!", 0, 0, nil, 35)
-		gameoverText.x = display.contentCenterX
-		gameoverText.y = display.contentCenterY
-		gameLayer:insert(gameoverText)
-		
-		menuBtn = widget.newButton{
-		labelColor = { default={255}, over={128} },
-		defaultFile="images/menubtn.png",
-		overFile="images/menubtnover.png",
-		width=154, height=40,
-		onRelease = menuBtnRelease	-- event listener function
-		}
-		menuBtn.x =  240
-		menuBtn.y =  230
-		
-		restartBtn = widget.newButton{
-		labelColor = { default={255}, over={128} },
-		defaultFile="images/restartbtn.png",
-		overFile="images/restartbtnover.png",
-		width=154, height=40,
-		onRelease = restartBtnRelease	-- event listener function
-		}
-		restartBtn.x =  240
-		restartBtn.y =  290
-		
-		-- all display objects must be inserted into group
-		gameLayer:insert( menuBtn )
-		gameLayer:insert( restartBtn )
 		gameIsActive = false
-		storyboard.removeScene( "level1" )
-		-- This will stop the gameLoop
+		composer.gotoScene("gameover","fade")
 	end
 
 	local function onCollision(self, event)
@@ -179,6 +112,11 @@ function scene:create( event )
 		end
 	end
 
+--------------------------------------------
+function scene:create( event )
+	print( "1: create scene level1" )
+	local sceneGroup = self.view
+	sceneGroup:insert(gameLayer)
 	-- Load and position the player
 	player = display.newImageRect("images/nave1.png",60,30)
 	player.y = display.contentCenterY
@@ -258,7 +196,7 @@ function scene:create( event )
 			end
 		
 			-- Spawn a bullet
-			if event.time - timeLastBullet >= math.random(250, 300) then
+			if event.time - timeLastBullet >= 300 then
 				local bullet = display.newImage("images/tiro1.png")
 				bullet.x = player.x + player.contentWidth/2
 				bullet.y = player.y
@@ -276,18 +214,17 @@ function scene:create( event )
 				-- Pew-pew sound!
 				audio.play(sounds.pew)
 				
-				-- Move it to the top.
 				-- When the movement is complete, it will remove itself: the onComplete event
 				-- creates a function to will store information about this bullet and then remove it.
 				transition.to(bullet, {time = 1000, x = display.contentWidth - bullet.contentHeight,
-					onComplete = function(self) self.parent:remove(self); self = nil; end
+					onComplete = function(self) if self.parent then self.parent:remove(self); self = nil; end end
 				})
 							
 				timeLastBullet = event.time
 			end
 			
 			---spaw enemy bullet
-			if halfPlayerWidth > 0 and event.time - timeLastEnemyBullet >= math.random(250, 300) and enemy.x ~= nil then
+			if halfPlayerWidth > 0 and event.time - timeLastEnemyBullet >= 400 and enemy.x ~= nil then
 				local Ebullet = display.newImage("images/tiro2.png")
 				Ebullet.x = enemy.x - halfPlayerWidth
 				Ebullet.y = enemy.y
@@ -304,12 +241,9 @@ function scene:create( event )
 				
 				-- Pew-pew sound!
 				audio.play(sounds.pew)
-				
-				-- Move it to the top.
-				-- When the movement is complete, it will remove itself: the onComplete event
-				-- creates a function to will store information about this bullet and then remove it.
+
 				transition.to(Ebullet, {time = 1000, x = Ebullet.contentHeight - display.contentWidth,
-					onComplete = function(self) self.parent:remove(self); self = nil; end
+					onComplete = function(self) if self.parent then self.parent:remove(self); self = nil; end end
 				})
 							
 				timeLastEnemyBullet = event.time
@@ -337,21 +271,30 @@ function scene:create( event )
 		end
 	end
 
-	-- Player will listen to touches
-	player:addEventListener("touch", playerMovement)
+	-- will listen to all touches
+	Runtime:addEventListener("touch", playerMovement)
 		
 end
 
 
 function scene:show( event )
 	local sceneGroup = self.view
-
-		physics.start()
-		sceneGroup.isVisible = true
-
+	local phase = event.phase
+	
+	if phase == "will" then
+		print( "1: show event, phase will level1" )
+		-- Called when the scene is still off screen and is about to move on screen
+		-- local currScene = composer.getSceneName( "level1" )
+		-- composer.gotoScene( currScene )
+	elseif phase == "did" then
+			print( "1: show event, phase did level1" )
+			sceneGroup.isVisible = true
+			composer.removeScene( "gameover" )
+	end	
 end
 
 function scene:hide( event )
+	print( "hide scene level 1" )
 	local sceneGroup = self.view
 		audio.stop()
 		sceneGroup.isVisible = false	
@@ -359,16 +302,7 @@ function scene:hide( event )
 end
 
 function scene:destroy( event )
-	-- Called prior to the removal of scene's "view" (gameLayer)
-	-- 
-	-- INSERT code here to cleanup the scene
-	-- e.g. remove display objects, remove touch listeners, save state, etc.
-	local sceneGroup = self.view
-	physics.stop()
-	audio.stop()
-	package.loaded[physics] = nil
-	physics = nil
-	sceneGroup:removeSelf()
+	print( "((destroying level1's view))" )
 end
 
 ---------------------------------------------------------------------------------
