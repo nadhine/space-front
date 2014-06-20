@@ -1,7 +1,5 @@
 -----------------------------------------------------------------------------------------
---
--- level1.lua
---
+--------- level1.lua
 -----------------------------------------------------------------------------------------
 -- include Corona's  libraries
 local widget = require "widget"
@@ -12,105 +10,107 @@ local physics = require "physics"
 local scene = composer.newScene()
 local backgroundsnd = audio.loadStream ( "audio/bgMusic.mp3")
 physics.start()
-physics.setGravity(-5, 0)
+physics.setGravity(0, 0)
 --------------------------------------------
-	local gameLayer    = display.newGroup()
-	local bulletsLayer = display.newGroup()
-	local enemiesLayer = display.newGroup()
-	local enemiesBulletsLayer = display.newGroup()
-	local barrierLayer = display.newGroup()
 
-	-- Declare variables
-	local gameIsActive = true
-	local scoreText
-	local sounds
-	local score = 0
-	local toRemove = {}
-	local background
-	local player
-	local halfPlayerWidth
-	local resist = 0
+-- Declare  Layers
+local gameLayer    = display.newGroup()
+local bulletsLayer = display.newGroup()
+local enemiesLayer = display.newGroup()
+local enemiesBulletsLayer = display.newGroup()
+local barrierLayer = display.newGroup()
 
-	local landscape = display.newImageRect( "images/fase1.png", 3963, 320 )
-	-- landscape:setReferencePoint( display.TopLeftReferencePoint )
-	landscape.anchorX = 0
-	landscape.anchorY = 0
-	landscape.x = 0
-	landscape.y = 0
-	gameLayer:insert(landscape)
+-- Declare variables
+local gameIsActive = true
+local scoreText
+local sounds
+local score = 0
+local toRemove = {}
+local background
+local player
+local halfPlayerWidth
+local resist = 0
 
-	-- Keep the texture for the enemy and bullet on memory, so Corona doesn't load them everytime
-	local textureCache = {}
-	textureCache[1] = display.newImage("images/meteoro1.png"); textureCache[1].isVisible = false;
-	textureCache[2] = display.newImage("images/tiro1.png");  textureCache[2].isVisible = false;
-	textureCache[3] = display.newImage("images/tiro2.png");  textureCache[3].isVisible = false;
-	textureCache[4] = display.newImage("images/inimigo1-1b.png");  textureCache[4].isVisible = false;
-	local halfEnemyWidth = textureCache[1].contentWidth * .5
+local landscape = display.newImageRect( "images/fase1.png", 3963, 320 )
+-- landscape:setReferencePoint( display.TopLeftReferencePoint )
+landscape.anchorX = 0
+landscape.anchorY = 0
+landscape.x = 0
+landscape.y = 0
+gameLayer:insert(landscape)
 
-	-- Adjust the volume
-	audio.setMaxVolume( 0.2, { channel=1 } )
-	audio.play (backgroundsnd, { loops = 3})
-	audio.setVolume(0.1, {backgroundsnd} )
-	
-	-- Pre-load our sounds
-	sounds = {
-		pew = audio.loadSound("audio/pew.wav"),
-		boom = audio.loadSound("audio/boom.wav"),
-		gameOver = audio.loadSound("audio/gameOver.wav")
-	}
+-- Keep the texture for the enemy and bullet on memory, so Corona doesn't load them everytime
+local textureCache = {}
+textureCache[1] = display.newImage("images/meteoro1.png"); textureCache[1].isVisible = false;
+textureCache[2] = display.newImage("images/tiro1.png");  textureCache[2].isVisible = false;
+textureCache[3] = display.newImage("images/tiro2.png");  textureCache[3].isVisible = false;
+textureCache[4] = display.newImage("images/inimigo1-1b.png");  textureCache[4].isVisible = false;
+local halfEnemyWidth = textureCache[1].contentWidth * .5
 
-	-- Order layers (background was already added, so add the bullets, enemies, and then later on
-	-- the player and the score will be added - so the score will be kept on top of everything)
-	gameLayer:insert(bulletsLayer)
-	gameLayer:insert(enemiesLayer)
-	gameLayer:insert(barrierLayer)
-	gameLayer:insert(enemiesBulletsLayer)
-	
+-- Adjust the volume
+audio.setMaxVolume( 0.2, { channel=1 } )
+audio.play (backgroundsnd, { loops = 3})
+audio.setVolume(0.1, {backgroundsnd} )
+
+-- Pre-load our sounds
+sounds = {
+	pew = audio.loadSound("audio/pew.wav"),
+	boom = audio.loadSound("audio/boom.wav"),
+	gameOver = audio.loadSound("audio/gameOver.wav")
+}
+
+-- Order layers (background was already added, so add the bullets, enemies, and then later on
+-- the player and the score will be added - so the score will be kept on top of everything)
+gameLayer:insert(bulletsLayer)
+gameLayer:insert(enemiesLayer)
+gameLayer:insert(barrierLayer)
+gameLayer:insert(enemiesBulletsLayer)
+
 
 ----paralax
-	local function reset_landscape( landscape )
-		landscape.x = 0
-		transition.to( landscape, {x=0-3963+480, time=30000, onComplete=reset_landscape} )
-	end
+local function reset_landscape( landscape )
+	landscape.x = 0
+	transition.to( landscape, {x=0-3963+480, time=30000, onComplete=reset_landscape} )
+end
 
-	local function gameover()
-		audio.play(sounds.gameOver)
-		gameIsActive = false
-		composer.gotoScene("gameover","fade")
-	end
+local function gameover()
+	audio.play(sounds.gameOver)
+	gameIsActive = false
+	composer.gotoScene("gameover","fade")
+end
 
-	local function onCollision(self, event)
-		-- Bullet hit enemy
-		if self.name == "bullet" and event.other.name == "enemy" and gameIsActive then
-			-- Increase score
-			score = score + 3
-			scoreText.text = score
-			
-			-- Play Sound
-			audio.play(sounds.boom)	
-			-- We can't remove a body inside a collision event, so queue it to removal.
-			-- It will be removed on the next frame inside the game loop.
-			table.insert(toRemove, event.other)
+local function onCollision(self, event)
+	-- Bullet hit enemy
+	if self.name == "bullet" and event.other.name == "enemy" and gameIsActive then
+		-- Increase score
+		score = score + 3
+		scoreText.text = score
 		
-		elseif self.name == "bullet" and event.other.name == "barrier" and gameIsActive then
-			-- Increase score
-			score = score + 1
-			scoreText.text = score
-			
-			-- Play Sound
-			audio.play(sounds.boom)	
-			-- We can't remove a body inside a collision event, so queue it to removal.
-			-- It will be removed on the next frame inside the game loop.
-			table.insert(toRemove, event.other)
-			
-		-- Player collision - GAME OVER	
-		elseif self.name == "player" and event.other.name == "enemy" or self.name == "player" and event.other.name == "barrier" then
-			gameover()		
-		end
-		if self.name == "Ebullet" and event.other.name == "player" then
-			gameover()			
-		end
+		-- Play Sound
+		audio.play(sounds.boom)	
+		-- We can't remove a body inside a collision event, so queue it to removal.
+		-- It will be removed on the next frame inside the game loop.
+		table.insert(toRemove, event.other)
+	
+	elseif self.name == "bullet" and event.other.name == "barrier" and gameIsActive then
+		-- Increase score
+		score = score + 1
+		scoreText.text = score
+		
+		-- Play Sound
+		audio.play(sounds.boom)	
+		-- We can't remove a body inside a collision event, so queue it to removal.
+		-- It will be removed on the next frame inside the game loop.
+		table.insert(toRemove, event.other)
+		
+	-- Player collision - GAME OVER	
+	elseif self.name == "player" and event.other.name == "enemy" or self.name == "player" and event.other.name == "barrier" then
+		gameover()		
 	end
+	if self.name == "Ebullet" and event.other.name == "player" then
+		gameover()			
+	end
+end
 
 --------------------------------------------
 function scene:create( event )
@@ -142,21 +142,33 @@ function scene:create( event )
 	reset_landscape( landscape )
 
 	-- Load and position the enemys
+	tableEnemies = {}
+	en = {}
+	tableEnemies[100] = 250
+	tableEnemies[200] = 250
+	tableEnemies[300] = 350
+	cont = 1
 	halfPlayerWidth = 0
-	enemy = display.newImageRect("images/inimigo1-1b.png",30,30)
-	enemy.y = 100
-	enemy.x = 450
-	-- Add a physics body. It is kinematic, so it doesn't react to gravity .....
-	physics.addBody(enemy, "dynamic", {density=10, bounce = 0})
-	-- This is necessary so we know who hit who when taking care of a collision event
-	enemy.name = "enemy"
-	-- Listen to collisions
-	enemy.collision = onCollision
-	enemy:addEventListener("collision", enemy)
-	-- Add to main layer
-	gameLayer:insert(enemy)
-	-- Store half width, used on the game loop
-	halfPlayerWidth = enemy.contentWidth * .5
+	for key,v in pairs(tableEnemies) do		
+		enemy = display.newImageRect("images/inimigo1-1b.png",30,30)
+		enemy.y = key
+		enemy.x = v
+		-- Add a physics body. It is kinematic, so it doesn't react to gravity .....
+		physics.addBody(enemy, "dynamic", {density=10, bounce = 0})
+		-- This is necessary so we know who hit who when taking care of a collision event
+		enemy.name = "enemy"
+		-- Listen to collisions
+		enemy.collision = onCollision
+		enemy:addEventListener("collision", enemy)
+		-- Add to main layer
+		enemiesLayer:insert(enemy)
+		gameLayer:insert(enemy)
+		en[cont] = enemy
+		cont = cont +1
+		-- Store half width, used on the game loop
+		halfPlayerWidth = enemy.contentWidth * .5
+		print (enemy.name)
+	end
 
 	--------------------------------------------------------------------------------
 	-- Game loop
@@ -184,15 +196,44 @@ function scene:create( event )
 				-- fall to the bottom of the screen.
 				physics.addBody(barrier, "dynamic", {bounce = 0})
 				barrier.name = "barrier"
-				
-				enemiesLayer:insert(barrier)
+				transition.to(barrier, {time = 10000, x = barrier.contentWidth - display.contentHeight,
+					onComplete = function(self) if self.parent then self.parent:remove(self); self = nil; end end})
+				barrierLayer:insert(barrier)
 				timeLastBarrier = event.time
 			end
 			---enemy movement
-			
-			if enemy.x ~= nil then
-				enemy.x = enemy.x - 2
+			for i = 1,3 do
+				enemy = (en[i])
+				if enemy.x ~= nil then
+					enemy.x = enemy.x - 2
+								---spaw enemy bullet
+				end
+				--- o parametro de tempo impede q as balas aparecam em todos os inimigos
+				if event.time - timeLastEnemyBullet >= 600 and enemy.x ~= nil then
+					
+					local Ebullet = display.newImage("images/tiro2.png")
+					Ebullet.x = enemy.x - halfPlayerWidth
+					Ebullet.y = enemy.y
 				
+					-- Kinematic, so it doesn't react to gravity.
+					physics.addBody(Ebullet, "dynamic", {bounce = 0})
+					Ebullet.name = "Ebullet"
+					-- Listen to collisions, so we may know when it hits an enemy.
+					Ebullet.collision = onCollision
+					Ebullet:addEventListener("collision", Ebullet)
+				
+					gameLayer:insert(Ebullet)
+					
+					-- Pew-pew sound!
+					audio.play(sounds.pew)
+
+					transition.to(Ebullet, {time = 1000, x = Ebullet.contentHeight - display.contentWidth,
+						onComplete = function(self) if self.parent then self.parent:remove(self); self = nil; end end
+					})
+								
+					timeLastEnemyBullet = event.time
+			
+				end
 			end
 		
 			-- Spawn a bullet
@@ -222,33 +263,7 @@ function scene:create( event )
 							
 				timeLastBullet = event.time
 			end
-			
-			---spaw enemy bullet
-			if halfPlayerWidth > 0 and event.time - timeLastEnemyBullet >= 400 and enemy.x ~= nil then
-				local Ebullet = display.newImage("images/tiro2.png")
-				Ebullet.x = enemy.x - halfPlayerWidth
-				Ebullet.y = enemy.y
-			
-				-- Kinematic, so it doesn't react to gravity.
-				physics.addBody(Ebullet, "dynamic", {bounce = 0})
-				Ebullet.name = "Ebullet"
-				
-				-- Listen to collisions, so we may know when it hits an enemy.
-				Ebullet.collision = onCollision
-				Ebullet:addEventListener("collision", Ebullet)
-			
-				gameLayer:insert(Ebullet)
-				
-				-- Pew-pew sound!
-				audio.play(sounds.pew)
-
-				transition.to(Ebullet, {time = 1000, x = Ebullet.contentHeight - display.contentWidth,
-					onComplete = function(self) if self.parent then self.parent:remove(self); self = nil; end end
-				})
-							
-				timeLastEnemyBullet = event.time
-		
-			end
+					
 		end
 	end
 
