@@ -143,12 +143,12 @@ function scene:create( event )
 
 	-- Load and position the enemys
 	tableEnemies = {}
-	en = {}
+	enemies = {}
 	tableEnemies[100] = 250
 	tableEnemies[200] = 250
 	tableEnemies[300] = 350
 	cont = 1
-	halfPlayerWidth = 0
+
 	for key,v in pairs(tableEnemies) do		
 		enemy = display.newImageRect("images/inimigo1-1b.png",30,30)
 		enemy.y = key
@@ -160,20 +160,19 @@ function scene:create( event )
 		-- Listen to collisions
 		enemy.collision = onCollision
 		enemy:addEventListener("collision", enemy)
+		enemy.timeLastEnemyBullet = 0
 		-- Add to main layer
 		enemiesLayer:insert(enemy)
 		gameLayer:insert(enemy)
-		en[cont] = enemy
+		enemies[cont] = enemy
 		cont = cont +1
-		-- Store half width, used on the game loop
-		halfPlayerWidth = enemy.contentWidth * .5
 		print (enemy.name)
 	end
 
 	--------------------------------------------------------------------------------
 	-- Game loop
 	--------------------------------------------------------------------------------
-	local timeLastBullet, timeLastBarrier , timeLastEnemyBullet= 0, 0, 0
+	local timeLastBullet, timeLastBarrier = 0, 0
 	local bulletInterval = 1000
 
 	local function gameLoop(event)
@@ -203,36 +202,38 @@ function scene:create( event )
 			end
 			---enemy movement
 			for i = 1,3 do
-				enemy = (en[i])
+				enemy = (enemies[i])
 				if enemy.x ~= nil then
 					enemy.x = enemy.x - 2
 								---spaw enemy bullet
 				end
 				--- o parametro de tempo impede q as balas aparecam em todos os inimigos
-				if event.time - timeLastEnemyBullet >= 600 and enemy.x ~= nil then
+				for i =1,3 do
+					if event.time - enemy.timeLastEnemyBullet >= 600 and enemy.x ~= nil then
+						
+						local Ebullet = display.newImage("images/tiro2.png")
+						Ebullet.x = enemy.x - enemy.contentWidth * .5
+						Ebullet.y = enemy.y
 					
-					local Ebullet = display.newImage("images/tiro2.png")
-					Ebullet.x = enemy.x - halfPlayerWidth
-					Ebullet.y = enemy.y
-				
-					-- Kinematic, so it doesn't react to gravity.
-					physics.addBody(Ebullet, "dynamic", {bounce = 0})
-					Ebullet.name = "Ebullet"
-					-- Listen to collisions, so we may know when it hits an enemy.
-					Ebullet.collision = onCollision
-					Ebullet:addEventListener("collision", Ebullet)
-				
-					gameLayer:insert(Ebullet)
+						-- Kinematic, so it doesn't react to gravity.
+						physics.addBody(Ebullet, "dynamic", {bounce = 0})
+						Ebullet.name = "Ebullet"
+						-- Listen to collisions, so we may know when it hits an enemy.
+						Ebullet.collision = onCollision
+						Ebullet:addEventListener("collision", Ebullet)
 					
-					-- Pew-pew sound!
-					audio.play(sounds.pew)
+						gameLayer:insert(Ebullet)
+						
+						-- Pew-pew sound!
+						audio.play(sounds.pew)
 
-					transition.to(Ebullet, {time = 1000, x = Ebullet.contentHeight - display.contentWidth,
-						onComplete = function(self) if self.parent then self.parent:remove(self); self = nil; end end
-					})
-								
-					timeLastEnemyBullet = event.time
-			
+						transition.to(Ebullet, {time = 1000, x = Ebullet.contentHeight - display.contentWidth,
+							onComplete = function(self) if self.parent then self.parent:remove(self); self = nil; end end
+						})
+									
+						enemy.timeLastEnemyBullet = event.time
+				
+					end
 				end
 			end
 		
