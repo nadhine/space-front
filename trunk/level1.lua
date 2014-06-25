@@ -6,6 +6,8 @@ local widget = require "widget"
 local storyboard = require "storyboard"
 local composer = require( "composer" )
 local physics = require "physics"
+local createEnemies = require "createEnemies"
+local createEnemiesBullets = require "createEnemiesBullets"
 
 local scene = composer.newScene()
 local backgroundsnd = audio.loadStream ( "audio/bgMusic.mp3")
@@ -66,11 +68,15 @@ gameLayer:insert(enemiesLayer)
 gameLayer:insert(barrierLayer)
 gameLayer:insert(enemiesBulletsLayer)
 
+local fimdeFase = function()
+	gameIsActive = false
+	composer.gotoScene("fimdefase","fade")
+end
 
 ----paralax
-local function reset_landscape( landscape )
+local function resetLandscape( landscape )
 	landscape.x = 0
-	transition.to( landscape, {x=0-3963+480, time=30000, onComplete=reset_landscape} )
+	transition.to( landscape, {x=0-3963+480, time=500, onComplete=fimdeFase} )
 end
 
 local function gameover()
@@ -104,11 +110,8 @@ local function onCollision(self, event)
 		table.insert(toRemove, event.other)
 		
 	-- Player collision - GAME OVER	
-	elseif self.name == "player" and event.other.name == "enemy" or self.name == "player" and event.other.name == "barrier" then
-		gameover()		
-	end
-	if self.name == "Ebullet" and event.other.name == "player" then
-		gameover()			
+	elseif self.name == "player" and event.other.name == "enemy" or self.name == "player" and event.other.name == "barrier" or self.name == "player" and event.other.name == "ebullet" then
+		gameover()
 	end
 end
 
@@ -139,50 +142,40 @@ function scene:create( event )
 	scoreText.y = 25
 	gameLayer:insert(scoreText)
 
-	reset_landscape( landscape )
+	resetLandscape( landscape )
 
 	-- Load and position the enemys
-	tableEnemies = {}
-	enemies = {}
-	tableEnemies[100] = 250
-	tableEnemies[200] = 250
-	tableEnemies[300] = 350
-	cont = 1
+	local tableEnemies = {[250] = 100, [251] = 200, [252] = 300 }
+	local enemies = {}
+	local cont = 1
 
 	for key,v in pairs(tableEnemies) do		
-		enemy = display.newImageRect("images/inimigo1-1b.png",30,30)
-		enemy.y = key
-		enemy.x = v
-		-- Add a physics body. It is kinematic, so it doesn't react to gravity .....
-		physics.addBody(enemy, "dynamic", {density=10, bounce = 0})
-		-- This is necessary so we know who hit who when taking care of a collision event
-		enemy.name = "enemy"
-		-- Listen to collisions
-		enemy.collision = onCollision
-		enemy:addEventListener("collision", enemy)
-		enemy.timeLastEnemyBullet = 0
-		-- Add to main layer
+		enemy = createEnemies.create("images/inimigo1-1b.png", key, v, 1000)
 		enemiesLayer:insert(enemy)
 		gameLayer:insert(enemy)
 		enemies[cont] = enemy
 		cont = cont +1
-		print (enemy.name)
+
+	end
+	
+	tableEnemies2 = {[600] = 100, [650] = 200, [680] = 150 }
+	for key,v in pairs(tableEnemies2) do		
+		enemy = createEnemies.create("images/inimigo1-2b.png", key, v, 3000)
+		enemiesLayer:insert(enemy)
+		gameLayer:insert(enemy)
+		enemies[cont] = enemy
+		cont = cont +1
+
 	end
 
 	--------------------------------------------------------------------------------
 	-- Game loop
 	--------------------------------------------------------------------------------
 	local timeLastBullet, timeLastBarrier = 0, 0
-	local bulletInterval = 1000
+
 
 	local function gameLoop(event)
 		if gameIsActive then
-			
-			-- Remove collided enemy planes
-			for i = 1, #toRemove do
-				toRemove[i].parent:remove(toRemove[i])
-				toRemove[i] = nil
-			end
 			-- Check if it's time to spawn another enemy,
 			-- based on a random range and last spawn (timeLastBarrier)
 			if event.time - timeLastBarrier >= math.random(600, 1000) then
@@ -191,80 +184,60 @@ function scene:create( event )
 				barrier.x = display.contentWidth + barrier.contentHeight
 				barrier.y = math.random(0, display.contentHeight)
 
-				-- This has to be dynamic, making it react to gravity, so it will
-				-- fall to the bottom of the screen.
 				physics.addBody(barrier, "dynamic", {bounce = 0})
 				barrier.name = "barrier"
-				transition.to(barrier, {time = 10000, x = barrier.contentWidth - display.contentHeight,
+				transition.to(barrier, {time = 10000, x = - display.contentWidth,
 					onComplete = function(self) if self.parent then self.parent:remove(self); self = nil; end end})
-				barrierLayer:insert(barrier)
+				if barrier then barrierLayer:insert(barrier)end
 				timeLastBarrier = event.time
 			end
+			
 			---enemy movement
-			for i = 1,3 do
+			for i = 1, 6 do
 				enemy = (enemies[i])
 				if enemy.x ~= nil then
-					enemy.x = enemy.x - 2
-								---spaw enemy bullet
+					enemy.x = enemy.x - 3
 				end
-				--- o parametro de tempo impede q as balas aparecam em todos os inimigos
-				for i =1,3 do
-					if event.time - enemy.timeLastEnemyBullet >= 600 and enemy.x ~= nil then
-						
-						local Ebullet = display.newImage("images/tiro2.png")
-						Ebullet.x = enemy.x - enemy.contentWidth * .5
-						Ebullet.y = enemy.y
-					
-						-- Kinematic, so it doesn't react to gravity.
-						physics.addBody(Ebullet, "dynamic", {bounce = 0})
-						Ebullet.name = "Ebullet"
-						-- Listen to collisions, so we may know when it hits an enemy.
-						Ebullet.collision = onCollision
-						Ebullet:addEventListener("collision", Ebullet)
-					
-						gameLayer:insert(Ebullet)
-						
-						-- Pew-pew sound!
-						audio.play(sounds.pew)
-
-						transition.to(Ebullet, {time = 1000, x = Ebullet.contentHeight - display.contentWidth,
-							onComplete = function(self) if self.parent then self.parent:remove(self); self = nil; end end
-						})
-									
-						enemy.timeLastEnemyBullet = event.time
-				
-					end
+				---spaw enemy bullet
+				if event.time - enemy.timeLastEnemyBullet >= enemy.interv and enemy.x ~= nil then
+					local ebullet = createEnemiesBullets.create(enemy, "images/tiro2.png")
+					enemy.timeLastEnemyBullet = event.time
+					gameLayer:insert(ebullet)
 				end
 			end
 		
-			-- Spawn a bullet
+			-- Spawn a player's bullet
 			if event.time - timeLastBullet >= 300 then
 				local bullet = display.newImage("images/tiro1.png")
-				bullet.x = player.x + player.contentWidth/2
+				bullet.x = player.x + player.contentWidth *0.5
 				bullet.y = player.y
-			
-				-- Kinematic, so it doesn't react to gravity.
-				physics.addBody(bullet, "kinematic", {bounce = 0})
+				physics.addBody(bullet, "dynamic", {density=10, bounce = 0})
 				bullet.name = "bullet"
-				
-				-- Listen to collisions, so we may know when it hits an enemy.
+				bullet.isBullet = true
+				bullet:setLinearVelocity( 800,0 )
 				bullet.collision = onCollision
 				bullet:addEventListener("collision", bullet)
 			
 				gameLayer:insert(bullet)
-				
-				-- Pew-pew sound!
 				audio.play(sounds.pew)
 				
 				-- When the movement is complete, it will remove itself: the onComplete event
 				-- creates a function to will store information about this bullet and then remove it.
-				transition.to(bullet, {time = 1000, x = display.contentWidth - bullet.contentHeight,
+				transition.to(bullet, {time = 1000, x = player.x + 400,
 					onComplete = function(self) if self.parent then self.parent:remove(self); self = nil; end end
 				})
 							
 				timeLastBullet = event.time
 			end
 					
+		end
+					
+		-- Remove collided enemy planes
+		if #toRemove then
+			for i = 1, #toRemove do
+				toRemove[i].parent:remove(toRemove[i])
+				toRemove[i] = nil
+			end
 		end
 	end
 
@@ -283,7 +256,7 @@ function scene:create( event )
 		-- Only move to the screen boundaries
 		if event.y >= player.height and event.y <= display.contentHeight-player.height then
 			-- Update player x axis
-			player.y = event.y + 5
+			player.y = event.y
 		end
 	end
 
