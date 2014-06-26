@@ -45,11 +45,6 @@ function endConection()
 end
 
 function generateId()
-    multiplayer:time({
-    callback = function(time)
-        -- GIVE PLAYER A UNIQUE ID
-        local key = math.random( 1, 999999 )
-        return key;
-    end
-    })
+    local id = system.getInfo( "deviceID" );
+    return id;
 end
