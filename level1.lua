@@ -21,6 +21,7 @@ local bulletsLayer = display.newGroup()
 local enemiesLayer = display.newGroup()
 local enemiesBulletsLayer = display.newGroup()
 local barrierLayer = display.newGroup()
+local explosionLayer = display.newGroup()
 
 -- Declare variables
 local gameIsActive = true
@@ -79,6 +80,17 @@ local function resetLandscape( landscape )
 	transition.to( landscape, {x=0-3963+480, time=50000, onComplete=fimdeFase} )
 end
 
+---explosion!!!
+local boom = graphics.newImageSheet( "images/explosion.png", { width=24, height=23, numFrames=8 } )
+
+local function explosion(obj)
+	local explosion = display.newSprite( boom, { name="boom", start=1, count=8, time=1000, loopCount =1 } )
+	explosion.x = obj.x
+	explosion.y = obj.y
+	explosionLayer:insert(explosion)
+	explosion:play()
+end
+
 local function gameover()
 	audio.play(sounds.gameOver)
 	gameIsActive = false
@@ -96,6 +108,7 @@ local function onCollision(self, event)
 		audio.play(sounds.boom)	
 		-- We can't remove a body inside a collision event, so queue it to removal.
 		-- It will be removed on the next frame inside the game loop.
+		explosion(event.other)
 		table.insert(toRemove, event.other)
 	
 	elseif self.name == "bullet" and event.other.name == "barrier" and gameIsActive then
@@ -107,10 +120,12 @@ local function onCollision(self, event)
 		audio.play(sounds.boom)	
 		-- We can't remove a body inside a collision event, so queue it to removal.
 		-- It will be removed on the next frame inside the game loop.
+		explosion(event.other)
 		table.insert(toRemove, event.other)
 		
 	-- Player collision - GAME OVER	
 	elseif self.name == "player" and event.other.name == "enemy" or self.name == "player" and event.other.name == "barrier" or self.name == "player" and event.other.name == "ebullet" then
+		explosion(self)
 		gameover()
 	end
 end
