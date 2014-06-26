@@ -11,6 +11,8 @@ local createEnemiesBullets = require "createEnemiesBullets"
 local globals = require( "globals" )
 -- include functions pubnub
 require ("multiplayerFunctions");
+-- include functions of protocols
+local protocolo = require("protocolos");
 
 local scene = composer.newScene()
 local backgroundsnd = audio.loadStream ( "audio/bgMusic.mp3")
@@ -37,6 +39,7 @@ local background
 local player
 local halfPlayerWidth
 local resist = 0
+playerId = generateId();
 
 local landscape = display.newImageRect( "images/fase1.png", 3963, 320 )
 -- landscape:setReferencePoint( display.TopLeftReferencePoint )
@@ -126,6 +129,8 @@ local function onCollision(self, event)
 		-- We can't remove a body inside a collision event, so queue it to removal.
 		-- It will be removed on the next frame inside the game loop.
 		explosion(event.other)
+		local obj = protocolo.destroyEnemy(playerId,event.other.x,event.other.y);
+		print( obj );
 		table.insert(toRemove, event.other)
 		
 	-- Player collision - GAME OVER	
