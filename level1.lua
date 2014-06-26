@@ -69,6 +69,7 @@ gameLayer:insert(bulletsLayer)
 gameLayer:insert(enemiesLayer)
 gameLayer:insert(barrierLayer)
 gameLayer:insert(enemiesBulletsLayer)
+gameLayer:insert(explosionLayer)
 
 local fimdeFase = function()
 	gameIsActive = false
@@ -202,9 +203,9 @@ function scene:create( event )
 
 				physics.addBody(barrier, "dynamic", {bounce = 0})
 				barrier.name = "barrier"
+				barrierLayer:insert(barrier)
 				transition.to(barrier, {time = 10000, x = - display.contentWidth,
 					onComplete = function(self) if self.parent then self.parent:remove(self); self = nil; end end})
-				if barrier then barrierLayer:insert(barrier)end
 				timeLastBarrier = event.time
 			end
 			
@@ -223,7 +224,7 @@ function scene:create( event )
 			end
 		
 			-- Spawn a player's bullet
-			if event.time - timeLastBullet >= 300 then
+			if event.time - timeLastBullet >= 300 and player.x ~= nil then
 				local bullet = display.newImage("images/tiro1.png")
 				bullet.x = player.x + player.contentWidth *0.5
 				bullet.y = player.y
