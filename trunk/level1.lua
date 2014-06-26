@@ -76,7 +76,7 @@ end
 ----paralax
 local function resetLandscape( landscape )
 	landscape.x = 0
-	transition.to( landscape, {x=0-3963+480, time=500, onComplete=fimdeFase} )
+	transition.to( landscape, {x=0-3963+480, time=50000, onComplete=fimdeFase} )
 end
 
 local function gameover()
