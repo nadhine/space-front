@@ -27,7 +27,7 @@ end
 
 local function multiPlayBtnRelease()
 	-- go to level1multi.lua scene
-	composer.gotoScene( "level1multi", "fade", 500 )
+	composer.gotoScene( "selectRoom", "fade", 500 )
 	
 	return true	-- indicates successful touch
 end
