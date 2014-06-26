@@ -2,7 +2,7 @@ local storyboard = require "storyboard"
 local composer = require "composer"
 local scene = composer.newScene()
 local widget = require "widget"
-local globals = require( "score" )
+local globals = require( "globals" )
 
 -- -----------------------------------------------------------------------------------------------------------------
 -- All code outside of the listener functions will only be executed ONCE unless "composer.removeScene()" is called.
@@ -14,7 +14,8 @@ local globals = require( "score" )
 
 print( "fimdefase.lua has been loaded." )
 
-local score = globals.score
+local score = 0
+local level = globals.fase
 
 ----back to menu
 local function menuBtnRelease()
@@ -28,7 +29,7 @@ end
 ---restart game
 local function restartBtnRelease()
 	-- go to fimdefase.lua scene
-	composer.gotoScene( "level1", "fade", 50  )
+	composer.gotoScene( level, "fade", 50  )
 	return true	-- indicates successful touch
 end
 
@@ -47,6 +48,7 @@ function scene:create( event )
 		gameoverText.y = display.contentCenterY -100
 		sceneGroup:insert(gameoverText)
 		
+	local score = globals.score
 	local ptsText = display.newText("Pontuação: "..score, 0, 0, nil, 15)
 		ptsText.x = display.contentCenterX 
 		ptsText.y = display.contentCenterY
@@ -93,7 +95,7 @@ function scene:show( event )
         -- Called when the scene is now on screen.
         -- Insert code here to make the scene come alive.
         -- Example: start timers, begin animation, play audio, etc.
-		composer.removeScene( "level1" )
+		composer.removeScene( level )
     end
 end
 
