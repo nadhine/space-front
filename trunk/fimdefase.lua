@@ -2,6 +2,7 @@ local storyboard = require "storyboard"
 local composer = require "composer"
 local scene = composer.newScene()
 local widget = require "widget"
+local globals = require( "score" )
 
 -- -----------------------------------------------------------------------------------------------------------------
 -- All code outside of the listener functions will only be executed ONCE unless "composer.removeScene()" is called.
@@ -12,6 +13,8 @@ local widget = require "widget"
 -- -------------------------------------------------------------------------------
 
 print( "fimdefase.lua has been loaded." )
+
+local score = globals.score
 
 ----back to menu
 local function menuBtnRelease()
@@ -44,8 +47,8 @@ function scene:create( event )
 		gameoverText.y = display.contentCenterY -100
 		sceneGroup:insert(gameoverText)
 		
-	local ptsText = display.newText("Pontuação: ", 0, 0, nil, 15)
-		ptsText.x = display.contentCenterX
+	local ptsText = display.newText("Pontuação: "..score, 0, 0, nil, 15)
+		ptsText.x = display.contentCenterX 
 		ptsText.y = display.contentCenterY
 		sceneGroup:insert(ptsText)
 		

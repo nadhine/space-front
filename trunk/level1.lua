@@ -8,6 +8,7 @@ local composer = require( "composer" )
 local physics = require "physics"
 local createEnemies = require "createEnemies"
 local createEnemiesBullets = require "createEnemiesBullets"
+local globals = require( "score" )
 
 local scene = composer.newScene()
 local backgroundsnd = audio.loadStream ( "audio/bgMusic.mp3")
@@ -27,7 +28,7 @@ local explosionLayer = display.newGroup()
 local gameIsActive = true
 local scoreText
 local sounds
-local score = 0
+globals.score = 0
 local toRemove = {}
 local background
 local player
@@ -101,8 +102,8 @@ local function onCollision(self, event)
 	-- Bullet hit enemy
 	if self.name == "bullet" and event.other.name == "enemy" and gameIsActive then
 		-- Increase score
-		score = score + 3
-		scoreText.text = score
+		globals.score = globals.score + 3
+		scoreText.text = globals.score
 		
 		-- Play Sound
 		audio.play(sounds.boom)	
@@ -113,8 +114,8 @@ local function onCollision(self, event)
 	
 	elseif self.name == "bullet" and event.other.name == "barrier" and gameIsActive then
 		-- Increase score
-		score = score + 1
-		scoreText.text = score
+		globals.score = globals.score + 1
+		scoreText.text = globals.score
 		
 		-- Play Sound
 		audio.play(sounds.boom)	
@@ -152,7 +153,7 @@ function scene:create( event )
 	halfPlayerWidth = player.contentWidth * .5
 
 	-- Show the score
-	scoreText = display.newText(score, 0, 0, nil, 25)
+	scoreText = display.newText(globals.score, 0, 0, nil, 25)
 	scoreText.x = 430
 	scoreText.y = 25
 	gameLayer:insert(scoreText)
