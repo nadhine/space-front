@@ -2,6 +2,7 @@ local storyboard = require "storyboard"
 local composer = require "composer"
 local scene = composer.newScene()
 local widget = require "widget"
+local globals = require( "globals" )
 
 -- -----------------------------------------------------------------------------------------------------------------
 -- All code outside of the listener functions will only be executed ONCE unless "composer.removeScene()" is called.
@@ -10,7 +11,7 @@ local widget = require "widget"
 -- local forward references should go here
 
 -- -------------------------------------------------------------------------------
-
+local level = globals.fase
 print( "gameover.lua has been loaded." )
 
 ----back to menu
@@ -25,7 +26,7 @@ end
 ---restart game
 local function restartBtnRelease()
 	-- go to gameover.lua scene
-	composer.gotoScene( "level1", "fade", 50  )
+	composer.gotoScene( level, "fade", 50  )
 	return true	-- indicates successful touch
 end
 
@@ -84,7 +85,7 @@ function scene:show( event )
         -- Called when the scene is now on screen.
         -- Insert code here to make the scene come alive.
         -- Example: start timers, begin animation, play audio, etc.
-		composer.removeScene( "level1" )
+		composer.removeScene(level)
     end
 end
 

@@ -8,7 +8,7 @@ local composer = require( "composer" )
 local physics = require "physics"
 local createEnemies = require "createEnemies"
 local createEnemiesBullets = require "createEnemiesBullets"
-local globals = require( "score" )
+local globals = require( "globals" )
 -- include functions pubnub
 require ("multiplayerFunctions");
 
@@ -31,6 +31,7 @@ local gameIsActive = true
 local scoreText
 local sounds
 globals.score = 0
+globals.fase = "level1multi"
 local toRemove = {}
 local background
 local player
@@ -136,7 +137,7 @@ end
 
 --------------------------------------------
 function scene:create( event )
-	print( "1: create scene level1" )
+	print( "1: create scene level1multi" )
 	local sceneGroup = self.view
 	sceneGroup:insert(gameLayer)
 	-- Load and position the player
@@ -290,19 +291,19 @@ function scene:show( event )
 	local phase = event.phase
 	
 	if phase == "will" then
-		print( "1: show event, phase will level1" )
+		print( "1: show event, phase will level1multi" )
 		-- Called when the scene is still off screen and is about to move on screen
 		-- local currScene = composer.getSceneName( "level1" )
 		-- composer.gotoScene( currScene )
 	elseif phase == "did" then
-			print( "1: show event, phase did level1" )
+			print( "1: show event, phase did level1multi" )
 			sceneGroup.isVisible = true
 			composer.removeScene( "gameover" )
 	end	
 end
 
 function scene:hide( event )
-	print( "hide scene level 1" )
+	print( "hide scene level1multi" )
 	local sceneGroup = self.view
 		audio.stop()
 		sceneGroup.isVisible = false	
@@ -310,7 +311,7 @@ function scene:hide( event )
 end
 
 function scene:destroy( event )
-	print( "((destroying level1's view))" )
+	print( "((destroying level1multi view))" )
 end
 
 ---------------------------------------------------------------------------------
