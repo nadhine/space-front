@@ -129,8 +129,10 @@ local function onCollision(self, event)
 		-- We can't remove a body inside a collision event, so queue it to removal.
 		-- It will be removed on the next frame inside the game loop.
 		explosion(event.other)
-		local obj = protocolo.destroyEnemy(playerId,event.other.x,event.other.y);
-		print( obj );
+
+		-- send a message to the server about the enemy die
+		local msgProtocol = protocolo.destroyEnemy(playerId,event.other.x,event.other.y);
+		sendMessage(msgProtocol);
 		table.insert(toRemove, event.other)
 		
 	-- Player collision - GAME OVER	
