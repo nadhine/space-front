@@ -13,6 +13,7 @@ local globals = require( "globals" )
 require ("multiplayerFunctions");
 -- include functions of protocols
 local protocolo = require("protocolos");
+local enemyPosition = require("enemyPosition")
 
 local scene = composer.newScene()
 local backgroundsnd = audio.loadStream ( "audio/bgMusic.mp3")
@@ -117,7 +118,7 @@ local function onCollision(self, event)
 		-- We can't remove a body inside a collision event, so queue it to removal.
 		-- It will be removed on the next frame inside the game loop.
 		explosion(event.other)
-		table.insert(toRemove, event.other)
+		display.remove(event.other)
 	
 	elseif self.name == "bullet" and event.other.name == "barrier" and gameIsActive then
 		-- Increase score
@@ -129,11 +130,11 @@ local function onCollision(self, event)
 		-- We can't remove a body inside a collision event, so queue it to removal.
 		-- It will be removed on the next frame inside the game loop.
 		explosion(event.other)
-
+		
 		-- send a message to the server about the enemy die
 		local msgProtocol = protocolo.destroyEnemy(playerId,event.other.x,event.other.y);
 		sendMessage(msgProtocol);
-		table.insert(toRemove, event.other)
+		display.remove(event.other)
 		
 	-- Player collision - GAME OVER	
 	elseif self.name == "player" and event.other.name == "enemy" or self.name == "player" and event.other.name == "barrier" or self.name == "player" and event.other.name == "ebullet" then
@@ -172,25 +173,27 @@ function scene:create( event )
 	resetLandscape( landscape )
 
 	-- Load and position the enemys
-	local tableEnemies = {[250] = 100, [251] = 200, [252] = 300 }
+	local tableEnemies = enemyPosition.stage1()
 	local enemies = {}
-	local cont = 1
+	local cont = 0
 
 	for key,v in pairs(tableEnemies) do		
-		enemy = createEnemies.create("images/inimigo1-1b.png", key, v, 1000)
+		enemy = createEnemies.create("images/inimigo1-1b.png", (v[1]), (v[2]), 1000)
 		enemiesLayer:insert(enemy)
 		gameLayer:insert(enemy)
 		enemies[cont] = enemy
+		enemy.id = cont
 		cont = cont +1
 
 	end
 	
-	tableEnemies2 = {[600] = 100, [650] = 200, [680] = 150 }
+	tableEnemies2 = enemyPosition.stage1b()
 	for key,v in pairs(tableEnemies2) do		
-		enemy = createEnemies.create("images/inimigo1-2b.png", key, v, 3000)
+		enemy = createEnemies.create("images/inimigo1-2b.png", (v[1]), (v[2]), 3000)
 		enemiesLayer:insert(enemy)
 		gameLayer:insert(enemy)
 		enemies[cont] = enemy
+		enemy.id = cont
 		cont = cont +1
 
 	end
@@ -211,7 +214,7 @@ function scene:create( event )
 				barrier.x = display.contentWidth + barrier.contentHeight
 				barrier.y = math.random(0, display.contentHeight)
 
-				physics.addBody(barrier, "dynamic", {bounce = 0})
+				physics.addBody(barrier, "dynamic", {density=1, bounce = 0, friction = 0})
 				barrier.name = "barrier"
 				barrierLayer:insert(barrier)
 				transition.to(barrier, {time = 10000, x = - display.contentWidth,
@@ -220,7 +223,7 @@ function scene:create( event )
 			end
 			
 			---enemy movement
-			for i = 1, 6 do
+			for i = 0,(table.getn(enemies)) do
 				enemy = (enemies[i])
 				if enemy.x ~= nil then
 					enemy.x = enemy.x - 3
@@ -238,7 +241,7 @@ function scene:create( event )
 				local bullet = display.newImage("images/tiro1.png")
 				bullet.x = player.x + player.contentWidth *0.5
 				bullet.y = player.y
-				physics.addBody(bullet, "dynamic", {density=10, bounce = 0})
+				physics.addBody(bullet, "dynamic", {density=1000, bounce = 0, friction = 0})
 				bullet.name = "bullet"
 				bullet.isBullet = true
 				bullet:setLinearVelocity( 800,0 )
@@ -259,13 +262,6 @@ function scene:create( event )
 					
 		end
 					
-		-- Remove collided enemy planes
-		if #toRemove then
-			for i = 1, #toRemove do
-				toRemove[i].parent:remove(toRemove[i])
-				toRemove[i] = nil
-			end
-		end
 	end
 
 	-- Call the gameLoop function EVERY frame,
