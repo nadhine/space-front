@@ -9,11 +9,13 @@ local scene = composer.newScene()
 
 -- include Corona's "widget" library
 local widget = require "widget"
+local globals = require( "globals" )
 
 --------------------------------------------
 
 -- forward declarations and other locals
 local playBtn
+local level = globals.fase
 local backgroundsnd = audio.loadStream ( "audio/POL-evil-throne-short.wav")
 
 -- 'onRelease' event listener for playBtn
@@ -115,7 +117,7 @@ function scene:show( event )
 		audio.play (backgroundsnd, { loops = 1})
 		sceneGroup.isVisible = true
 		composer.removeScene( "about" )
-		composer.removeScene( "level1" )
+		composer.removeScene( level )
 	end	
 end
 
