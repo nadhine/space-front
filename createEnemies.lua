@@ -4,8 +4,9 @@ function create(image, x, y, interv)
 	enemy = display.newImage(image) 
 	enemy.x = x
 	enemy.y = y
-	physics.addBody(enemy, "dynamic", {density=10, bounce = 0})
+	physics.addBody(enemy, "dynamic", {density=5, bounce = 0, friction = 0})
 	enemy.name = "enemy"
+	enemy.id = 0
 	enemy.collision = onCollision
 	enemy:addEventListener("collision", enemy)
 	enemy.timeLastEnemyBullet = 0

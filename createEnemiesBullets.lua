@@ -5,7 +5,7 @@ function create(enemy, image)
 	Ebullet.y = enemy.y
 
 	-- Kinematic, so it doesn't react to gravity.
-	physics.addBody(Ebullet, "dynamic", {density=10, bounce = 0})
+	physics.addBody(Ebullet, "dynamic", {density=1000, bounce = 0, friction = 0})
 	Ebullet.name = "ebullet"
 	-- Listen to collisions, so we may know when it hits an enemy.
 	Ebullet.collision = onCollision
