@@ -4,6 +4,8 @@ local scene = composer.newScene()
 local widget = require "widget"
 local globals = require( "globals" )
 
+widget.setTheme( "widget_theme_android" )
+
 -- -----------------------------------------------------------------------------------------------------------------
 -- All code outside of the listener functions will only be executed ONCE unless "composer.removeScene()" is called.
 -- -----------------------------------------------------------------------------------------------------------------
@@ -13,6 +15,7 @@ local globals = require( "globals" )
 -- -------------------------------------------------------------------------------
 local level = globals.fase
 print( "selectRoom.lua has been loaded." )
+
 
 ----back to menu
 local function menuBtnRelease()
@@ -29,9 +32,30 @@ local function onPlayBtnRelease()
 	return true	-- indicates successful touch
 end
 -- Handle press events for the checkbox
-local function onSwitchPress( event )
-    local switch = event.target
-    print( "Switch with ID '"..switch.id.."' is on: "..tostring(switch.isOn) )
+
+local function tableViewListener( event )
+    local phase = event.phase
+    local row = event.target
+end
+
+-- Handle row rendering
+local function onRowRender( event )
+    local phase = event.phase
+    local row = event.row
+
+    local rowTitle = display.newText( row, "Row " .. row.index, 0, 0, nil, 10 )
+    rowTitle.x = row.x - ( row.contentWidth * 0.5 ) + ( rowTitle.contentWidth * 0.5 )
+    rowTitle.y = row.contentHeight * 0.5
+    rowTitle:setFillColor( 255, 255, 255 )
+end
+
+-- Handle touches on the row
+local function onRowTouch( event )
+    local phase = event.phase
+
+    if "press" == phase then
+        print( "Touched row:", event.target.index )
+    end
 end
 
 
@@ -47,7 +71,7 @@ function scene:create( event )
 
 	local gameoverText = display.newText("Selecione sua sala: ", 0, 0, nil, 20)
 		gameoverText.x = 100
-		gameoverText.y = 100
+		gameoverText.y = 80
 		sceneGroup:insert(gameoverText)
 		
 	local menuBtn = widget.newButton{
@@ -70,24 +94,54 @@ function scene:create( event )
 		playBtn.x =  380
 		playBtn.y =  190
 		
+	local tableView = widget.newTableView
+	{
+		top = 100,
+		width = 160, 
+		height = 160,
+		listener = tableViewListener,
+		onRowRender = onRowRender,
+		onRowTouch = onRowTouch,
+	}
+		tableView.x = 100
+		tableView.y = 200
 
-		local checkboxBtn = widget.newSwitch{
-			left = 240,
-			top = 350,
-			style = "checkbox",
-			id = "Checkbox",
-			onPress = onSwitchPress
+	-- Create 5 rows
+	for i = 1, 4 do
+		local isCategory = false
+		local rowHeight = 40
+		local rowColor = 
+		{ 
+			default = { 0, 0, 0 },
 		}
-		checkboxBtn.text = display.newEmbossedText( tostring( checkboxBtn.isOn ), 0, 0, native.systemFontBold, 18 )
-		checkboxBtn.text.x = checkboxBtn.x
-		checkboxBtn.text.y = checkboxBtn.y - checkboxBtn.text.contentHeight
-		
+		local lineColor = { 105, 105, 105 }
+
+		-- Make some rows categories
+		if i == 25 or i == 50 or i == 75 then
+			isCategory = true
+			rowHeight = 24
+			rowColor = 
+			{ 
+				default = { 150, 160, 180, 200 },
+			}
+		end
+
+		-- Insert the row into the tableView
+		tableView:insertRow
+		{
+			isCategory = isCategory,
+			rowHeight = rowHeight,
+			rowColor = rowColor,
+			lineColor = lineColor,
+		}
+	end 
+				
 		-- all display objects must be inserted into group
 		sceneGroup:insert( background )
 		sceneGroup:insert( gameoverText )
 		sceneGroup:insert( menuBtn )
 		sceneGroup:insert( playBtn )
-		sceneGroup:insert( checkboxBtn )
+		sceneGroup:insert( tableView )
 end
 
 
