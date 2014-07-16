@@ -10,7 +10,7 @@ function destroyEnemy(playerId, enemyX, enemyY)
 end
 
 function positionPlayer(playerId, playerX, playerY)
-	local proto;
+	proto = {};
 	proto["playerId"] = playerId;
 	proto["playerX"] = playerX;
 	proto["playerY"] = playerY;
@@ -19,10 +19,10 @@ function positionPlayer(playerId, playerX, playerY)
 end
  
 function positionPlayerBullet(playerId,bulletX,bulletY)
- 	local proto;
-	proto["playerId"] = playerId;
-	proto["bulletX"] = bulletX;
-	proto["bulletY"] = bulletY;
-	proto["protocolo"] = "positionPlayerBullet";
-	return proto;
+ 	proto = {}
+	proto["playerId"] = playerId
+	proto["bulletX"] = bulletX
+	proto["bulletY"] = bulletY
+	proto["protocolo"] = "positionPlayerBullet"
+	return proto
  end

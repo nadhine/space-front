@@ -131,9 +131,6 @@ local function onCollision(self, event)
 		-- It will be removed on the next frame inside the game loop.
 		explosion(event.other)
 		
-		-- send a message to the server about the enemy die
-		local msgProtocol = protocolo.destroyEnemy(playerId,event.other.x,event.other.y);
-		sendMessage(msgProtocol);
 		display.remove(event.other)
 		
 	-- Player collision - GAME OVER	
@@ -235,7 +232,7 @@ function scene:create( event )
 					gameLayer:insert(ebullet)
 				end
 			end
-		
+			
 			-- Spawn a player's bullet
 			if event.time - timeLastBullet >= 300 and player.x ~= nil then
 				local bullet = display.newImage("images/tiro1.png")
@@ -248,6 +245,15 @@ function scene:create( event )
 				bullet.collision = onCollision
 				bullet:addEventListener("collision", bullet)
 			
+				-- before of create the bullet in stage, send to pubnub for the other player see the bullet
+				local protoBullet = {}
+				protoBullet["playerId"] = playerId
+				protoBullet["bulletX"] = bullet.x
+				protoBullet["bulletY"] = bullet.y
+				protoBullet["room"]    = "sala1"
+				protoBullet["protocolo"] = "positionPlayerBullet"
+				sendMessage(protoBullet)
+
 				gameLayer:insert(bullet)
 				audio.play(sounds.pew)
 				
