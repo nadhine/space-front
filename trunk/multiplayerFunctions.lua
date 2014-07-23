@@ -26,6 +26,7 @@ end
 
 
 function getMessage()
+    local content 
     multiplayer:subscribe({
     channel = "space-front",
     callback = function(message)
@@ -33,7 +34,7 @@ function getMessage()
         print(message)
     end,
     errorback = function()
-        print("Network Connection Lost")
+        content = "Network Connection Lost"
     end
     })
 end

@@ -135,8 +135,8 @@ local function onCollision(self, event)
 		
 	-- Player collision - GAME OVER	
 	elseif self.name == "player" and event.other.name == "enemy" or self.name == "player" and event.other.name == "barrier" or self.name == "player" and event.other.name == "ebullet" then
-		explosion(self)
-		gameover()
+		--explosion(self)
+		--gameover()
 	end
 end
 
@@ -233,6 +233,10 @@ function scene:create( event )
 				end
 			end
 			
+			local carro = getMessage();
+			print(carro)
+			--Se receber uma tabela verificar dessa forma table['protocolo'] para saber qual o protocolo, dps pega as variaveis x e y
+			--table['bulletX'] e table['bulletY']
 			-- Spawn a player's bullet
 			if event.time - timeLastBullet >= 300 and player.x ~= nil then
 				local bullet = display.newImage("images/tiro1.png")
@@ -247,7 +251,7 @@ function scene:create( event )
 			
 				-- before of create the bullet in stage, send to pubnub for the other player see the bullet
 				local protoBullet = {}
-				protoBullet["playerId"] = playerId
+				protoBullet["playerId"] = 1
 				protoBullet["bulletX"] = bullet.x
 				protoBullet["bulletY"] = bullet.y
 				protoBullet["room"]    = "sala1"
