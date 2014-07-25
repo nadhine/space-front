@@ -233,8 +233,6 @@ function scene:create( event )
 				end
 			end
 			
-			local carro = getMessage();
-			print(carro)
 			--Se receber uma tabela verificar dessa forma table['protocolo'] para saber qual o protocolo, dps pega as variaveis x e y
 			--table['bulletX'] e table['bulletY']
 			-- Spawn a player's bullet
