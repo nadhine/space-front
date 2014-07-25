@@ -40,7 +40,7 @@ local background
 local player
 local halfPlayerWidth
 local resist = 0
-playerId = generateId();
+
 
 local landscape = display.newImageRect( "images/fase1.png", 3963, 320 )
 -- landscape:setReferencePoint( display.TopLeftReferencePoint )
@@ -205,6 +205,51 @@ function scene:create( event )
 		if gameIsActive then
 			-- Check if it's time to spawn another enemy,
 			-- based on a random range and last spawn (timeLastBarrier)
+			if(packReceived~="nada") then
+				if(player2 == nil) then
+						-- Load and position the player
+					player2 = display.newImageRect("images/nave2.png",60,30)
+					player2.y = packReceived["bulletY"]
+					player2.x = packReceived["bulletX"]
+					-- Add a physics body. It is kinematic, so it doesn't react to gravity.
+					physics.addBody(player, "kinematic", {bounce = 0})
+					-- This is necessary so we know who hit who when taking care of a collision event
+					player2.name = "player"
+					-- Listen to collisions
+					player2.collision = onCollision
+					player2:addEventListener("collision", player2)
+					-- Add to main layer
+					gameLayer:insert(player2)
+				end
+				if(player2 ~= nil) then
+					player2.x = packReceived["bulletX"]
+					player2.y = packReceived["bulletY"]
+				end
+					
+
+				--COLOCAR AQUI AS FUNÇOES DE CRIAR AS BALAS E O JOGADOR 2
+				local bullet = display.newImage("images/tiro1.png")
+				bullet.x = packReceived["bulletX"] + player.contentWidth *0.5
+				bullet.y = packReceived["bulletY"]
+				physics.addBody(bullet, "dynamic", {density=1000, bounce = 0, friction = 0})
+				bullet.name = "bullet"
+				bullet.isBullet = true
+				bullet:setLinearVelocity( 800,0 )
+				bullet.collision = onCollision
+				bullet:addEventListener("collision", bullet)
+
+				gameLayer:insert(bullet)
+				audio.play(sounds.pew)
+				
+				-- When the movement is complete, it will remove itself: the onComplete event
+				-- creates a function to will store information about this bullet and then remove it.
+				transition.to(bullet, {time = 1000, x =  packReceived["bulletX"] + 400,
+					onComplete = function(self) if self.parent then self.parent:remove(self); self = nil; end end
+				})
+				
+				print( packReceived["bulletY"] )
+				packReceived="nada"
+			end
 			if event.time - timeLastBarrier >= math.random(600, 1000) then
 				-- Randomly position it on the top of the screen
 				local barrier = display.newImage("images/meteoro1.png")
@@ -249,7 +294,7 @@ function scene:create( event )
 			
 				-- before of create the bullet in stage, send to pubnub for the other player see the bullet
 				local protoBullet = {}
-				protoBullet["playerId"] = 1
+				protoBullet["playerId"] = playerId
 				protoBullet["bulletX"] = bullet.x
 				protoBullet["bulletY"] = bullet.y
 				protoBullet["room"]    = "sala1"
