@@ -1,6 +1,14 @@
 require "pubnub"
 require "math"
 
+
+function generateId()
+    local id = system.getInfo( "deviceID" );
+    return id;
+end
+
+playerId = 1
+
 multiplayer = pubnub.new({
     publish_key = "pub-c-a585bb6f-5131-4fed-b4b7-a158a38cff38", -- YOUR PUBLISH KEY
     subscribe_key = "sub-c-ef701846-f039-11e3-928e-02ee2ddab7fe", -- YOUR SUBSCRIBE KEY
@@ -24,13 +32,14 @@ function sendMessage(text)
     })
 end
 
+packReceived = "nada"
 multiplayer:subscribe({
     channel = "space-front",
     callback = function(message)
         -- MESSAGE RECEIVED!!!
         if(message["protocolo"] == "positionPlayerBullet") then
               if(message["playerId"] ~= playerId) then
-                print(message["playerId"])
+                packReceived = message
               end  
         end
     end,
@@ -38,15 +47,10 @@ multiplayer:subscribe({
         print("Network Connection Lost");
     end
 })
-
+    
 
 function endConection()
     multiplayer:unsubscribe({
         channel = "space-front"
     })
-end
-
-function generateId()
-    local id = system.getInfo( "deviceID" );
-    return id;
 end
