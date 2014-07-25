@@ -24,20 +24,21 @@ function sendMessage(text)
     })
 end
 
-
-function getMessage()
-    local content 
-    multiplayer:subscribe({
+multiplayer:subscribe({
     channel = "space-front",
     callback = function(message)
         -- MESSAGE RECEIVED!!!
-        print(message)
+        if(message["protocolo"] == "positionPlayerBullet") then
+              if(message["playerId"] ~= playerId) then
+                print(message["playerId"])
+              end  
+        end
     end,
     errorback = function()
-        content = "Network Connection Lost"
+        print("Network Connection Lost");
     end
-    })
-end
+})
+
 
 function endConection()
     multiplayer:unsubscribe({
