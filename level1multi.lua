@@ -36,6 +36,7 @@ local gameIsActive = true
 local scoreText
 local sounds
 globals.score = 0
+globals.vida = 3
 globals.fase = "level1multi"
 local toRemove = {}
 local background
@@ -82,7 +83,7 @@ gameLayer:insert(explosionLayer)
 
 local fimdeFase = function()
 	gameIsActive = false
-	composer.gotoScene("fimdefase","fade")
+	composer.gotoScene("fimdefaseMulti","fade")
 end
 
 ----paralax
@@ -127,7 +128,8 @@ local function onCollision(self, event)
 	-- Player collision - GAME OVER	
 	elseif self.name == "player" and event.other.name == "enemy" or self.name == "player" and event.other.name == "barrier" or self.name == "player" and event.other.name == "ebullet" then
 		local explosion = createExplosion.create(self, "images/explosion.png", 24,23,8)
-		--gameover()
+		local explosion = createExplosion.create(event.other, "images/explosion.png", 24,23,8)
+		display.remove(event.other)
 		if globals.vida == 0 then
 			gameover()
 		else

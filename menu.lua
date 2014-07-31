@@ -117,6 +117,7 @@ function scene:show( event )
 		audio.play (backgroundsnd, { loops = 1})
 		sceneGroup.isVisible = true
 		composer.removeScene( "about" )
+		composer.removeScene( "gameover" )
 		composer.removeScene( "selectRoom" )
 		composer.removeScene( level )
 	end	
