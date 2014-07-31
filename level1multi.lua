@@ -8,12 +8,14 @@ local composer = require( "composer" )
 local physics = require "physics"
 local createEnemies = require "createEnemies"
 local createEnemiesBullets = require "createEnemiesBullets"
+local createExplosion = require "createExplosion"
 local globals = require( "globals" )
 -- include functions pubnub
 require ("multiplayerFunctions");
 -- include functions of protocols
 local protocolo = require("protocolos");
 local enemyPosition = require("enemyPosition")
+local vidas = require("lifes")
 
 local scene = composer.newScene()
 local backgroundsnd = audio.loadStream ( "audio/bgMusic.mp3")
@@ -89,16 +91,6 @@ local function resetLandscape( landscape )
 	transition.to( landscape, {x=0-3963+480, time=50000, onComplete=fimdeFase} )
 end
 
----explosion!!!
-local boom = graphics.newImageSheet( "images/explosion.png", { width=24, height=23, numFrames=8 } )
-
-local function explosion(obj)
-	local explosion = display.newSprite( boom, { name="boom", start=1, count=8, time=1000, loopCount =1 } )
-	explosion.x = obj.x
-	explosion.y = obj.y
-	explosionLayer:insert(explosion)
-	explosion:play()
-end
 
 local function gameover()
 	audio.play(sounds.gameOver)
@@ -117,7 +109,7 @@ local function onCollision(self, event)
 		audio.play(sounds.boom)	
 		-- We can't remove a body inside a collision event, so queue it to removal.
 		-- It will be removed on the next frame inside the game loop.
-		explosion(event.other)
+		local explosion = createExplosion.create(event.other, "images/explosion.png", 24,23,8)
 		display.remove(event.other)
 	
 	elseif self.name == "bullet" and event.other.name == "barrier" and gameIsActive then
@@ -129,14 +121,18 @@ local function onCollision(self, event)
 		audio.play(sounds.boom)	
 		-- We can't remove a body inside a collision event, so queue it to removal.
 		-- It will be removed on the next frame inside the game loop.
-		explosion(event.other)
-		
+		local explosion = createExplosion.create(event.other, "images/explosion.png", 24,23,8)		
 		display.remove(event.other)
 		
 	-- Player collision - GAME OVER	
 	elseif self.name == "player" and event.other.name == "enemy" or self.name == "player" and event.other.name == "barrier" or self.name == "player" and event.other.name == "ebullet" then
-		--explosion(self)
+		local explosion = createExplosion.create(self, "images/explosion.png", 24,23,8)
 		--gameover()
+		if globals.vida == 0 then
+			gameover()
+		else
+			globals.vida = globals.vida - 1 
+		end
 	end
 end
 
@@ -203,6 +199,7 @@ function scene:create( event )
 
 	local function gameLoop(event)
 		if gameIsActive then
+			vidas.minhaVida()
 			-- Check if it's time to spawn another enemy,
 			-- based on a random range and last spawn (timeLastBarrier)
 			if(packReceived~="nada") then

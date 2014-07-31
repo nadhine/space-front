@@ -11,6 +11,7 @@ local createEnemiesBullets = require "createEnemiesBullets"
 local createExplosion = require "createExplosion"
 local globals = require( "globals" )
 local enemyPosition = require("enemyPosition")
+local vidas = require("lifes")
 
 local scene = composer.newScene()
 local backgroundsnd = audio.loadStream ( "audio/bgMusic.mp3")
@@ -25,6 +26,7 @@ local enemiesLayer = display.newGroup()
 local enemiesBulletsLayer = display.newGroup()
 local barrierLayer = display.newGroup()
 local explosionLayer = display.newGroup()
+local lifeLayer = display.newGroup()
 
 -- Declare variables
 local gameIsActive = true
@@ -73,6 +75,7 @@ gameLayer:insert(enemiesLayer)
 gameLayer:insert(barrierLayer)
 gameLayer:insert(enemiesBulletsLayer)
 gameLayer:insert(explosionLayer)
+gameLayer:insert(lifeLayer)
 
 local fimdeFase = function()
 	gameIsActive = false
@@ -122,7 +125,11 @@ local function onCollision(self, event)
 	-- Player collision - GAME OVER	
 	elseif self.name == "player" and event.other.name == "enemy" or self.name == "player" and event.other.name == "barrier" or self.name == "player" and event.other.name == "ebullet" then
 		local explosion = createExplosion.create(self, "images/explosion.png", 24,23,8)
-		gameover()
+		if globals.vida == 0 then
+			gameover()
+		else
+			globals.vida = globals.vida - 1 
+		end
 	end
 end
 
@@ -146,6 +153,7 @@ function scene:create( event )
 	gameLayer:insert(player)
 	-- Store half width, used on the game loop
 	halfPlayerWidth = player.contentWidth * .5
+
 
 	-- Show the score
 	scoreText = display.newText(globals.score, 0, 0, nil, 25)
@@ -188,6 +196,7 @@ function scene:create( event )
 
 	local function gameLoop(event)
 		if gameIsActive then
+			vidas.minhaVida()
 			-- Check if it's time to spawn another enemy,
 			-- based on a random range and last spawn (timeLastBarrier)
 			if event.time - timeLastBarrier >= math.random(600, 1000) then
