@@ -3,7 +3,8 @@ local composer = require "composer"
 local scene = composer.newScene()
 local widget = require "widget"
 local globals = require( "globals" )
-
+local vidas = require("lifes")
+require ("multiplayerFunctions");
 -- -----------------------------------------------------------------------------------------------------------------
 -- All code outside of the listener functions will only be executed ONCE unless "composer.removeScene()" is called.
 -- -----------------------------------------------------------------------------------------------------------------
@@ -16,6 +17,7 @@ print( "fimdefaseMulti.lua has been loaded." )
 
 local score = 0
 local level = globals.fase
+local gameIsActive = true
 
 ----back to menu
 local function menuBtnRelease()
@@ -33,6 +35,35 @@ local function restartBtnRelease()
 	return true	-- indicates successful touch
 end
 
+local function maisVidaBtnRelease()
+	-- go to fimdefase.lua scene
+	if globals.score > 50 then
+		globals.vida = globals.vida + 1
+		globals.score = globals.score - 50
+		local score = globals.score
+		vidas.minhaVida()
+	end
+	return true	-- indicates successful touch
+end
+
+local function doacaoBtnRelease()
+	-- go to fimdefase.lua scene
+	if globals.score >  50 then
+		globals.score = globals.score - 50
+		
+	end
+	return true	-- indicates successful touch
+end
+
+local function handlerFunction( event )
+
+    if ( event.phase == "began" ) then
+
+        -- user begins editing text field
+        print( event.text )
+    end   
+end
+
 -- "scene:create()"
 function scene:create( event )
 	print( "1: create scene fimdefase" )
@@ -45,14 +76,41 @@ function scene:create( event )
 
 	local gameoverText = display.newText("Fim de Fase!", 0, 0, nil, 35)
 		gameoverText.x = display.contentCenterX
-		gameoverText.y = display.contentCenterY -100
+		gameoverText.y = display.contentCenterY - 120
 		sceneGroup:insert(gameoverText)
 		
 	local score = globals.score
-	local ptsText = display.newText("Pontuação: "..score, 0, 0, nil, 15)
-		ptsText.x = display.contentCenterX 
-		ptsText.y = display.contentCenterY
-		sceneGroup:insert(ptsText)
+	local ptsText = display.newText(" Sua Pontuação: "..score, 0, 0, nil, 15)
+		ptsText.x = 90
+		ptsText.y = 100
+		
+	local ptsPLayer2Text = display.newText(" P2: "..score, 0, 0, nil, 15)
+		ptsPLayer2Text.x = 90
+		ptsPLayer2Text.y = 150
+		
+	local numericField = native.newTextField( 275, 150, 150, 40 )
+		numericField.inputType = "number"
+		numericField:addEventListener( "userInput", handlerFunction )	
+		
+	local maisVidaBtn = widget.newButton{
+		labelColor = { default={255}, over={128} },
+		defaultFile="images/maisVidaBtn.png",
+		overFile="images/maisVidaBtn.png",
+		width=150, height=40,
+		onRelease = maisVidaBtnRelease	-- event listener function
+		}
+		maisVidaBtn.x =  275
+		maisVidaBtn.y =  100
+	
+	local doacaoBtn = widget.newButton{
+		labelColor = { default={255}, over={128} },
+		defaultFile="images/doacaoBtn.png",
+		overFile="images/doacaoBtn.png",
+		width=20, height=40,
+		onRelease = doacaoBtnRelease	-- event listener function
+		}
+		doacaoBtn.x =  numericField.x - 100
+		doacaoBtn.y =  numericField.y
 		
 	local menuBtn = widget.newButton{
 		labelColor = { default={255}, over={128} },
@@ -62,7 +120,7 @@ function scene:create( event )
 		onRelease = menuBtnRelease	-- event listener function
 		}
 		menuBtn.x =  240
-		menuBtn.y =  230
+		menuBtn.y =  210
 		
 	local restartBtn = widget.newButton{
 		labelColor = { default={255}, over={128} },
@@ -74,12 +132,26 @@ function scene:create( event )
 		restartBtn.x =  240
 		restartBtn.y =  290
 		
+
+		
 		-- all display objects must be inserted into group
 		sceneGroup:insert( background )
 		sceneGroup:insert( gameoverText )
 		sceneGroup:insert( ptsText)
 		sceneGroup:insert( menuBtn )
 		sceneGroup:insert( restartBtn )
+		sceneGroup:insert( maisVidaBtn )
+		sceneGroup:insert( doacaoBtn )
+		sceneGroup:insert( numericField )
+		
+	-- local function gameLoop(event)
+		-- if gameIsActive then
+			-- if handlerFunction then
+				-- sendMessage()
+			-- end
+		-- end
+	-- end
+		-- Runtime:addEventListener("enterFrame", gameLoop)
 end
 
 
