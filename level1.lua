@@ -35,13 +35,14 @@ local sounds
 globals.score = 0
 globals.vida = 3
 globals.fase = "level1"
+globals.nextfase = "level2"
 local toRemove = {}
 local background
 local player
 local halfPlayerWidth
 local resist = 0
 
-local landscape = display.newImageRect( "images/fase1.png", 3963, 320 )
+local landscape = display.newImageRect( "images/fase1.png", 4996, 320 )
 -- landscape:setReferencePoint( display.TopLeftReferencePoint )
 landscape.anchorX = 0
 landscape.anchorY = 0
@@ -87,7 +88,7 @@ end
 ----paralax
 local function resetLandscape( landscape )
 	landscape.x = 0
-	transition.to( landscape, {x=0-3963+480, time=50000, onComplete=fimdeFase} )
+	transition.to( landscape, {x=0-4996+480, time=50000, onComplete=fimdeFase} )
 end
 
 local function gameover()
@@ -109,7 +110,7 @@ local function onCollision(self, event)
 		-- It will be removed on the next frame inside the game loop.
 		local explosion = createExplosion.create(event.other, "images/explosion.png", 24,23,8)
 		display.remove(event.other) 
-		-- table.insert(toRemove, event.other)
+		display.remove(self)
 	
 	elseif self.name == "bullet" and event.other.name == "barrier" and gameIsActive then
 		-- Increase score
@@ -122,6 +123,16 @@ local function onCollision(self, event)
 		-- It will be removed on the next frame inside the game loop.
 		local explosion = createExplosion.create(event.other, "images/explosion.png", 24,23,8)
 		display.remove(event.other)
+		display.remove(self)
+		
+	elseif self.name == "bullet" and event.other.name == "ebullet" and gameIsActive then
+		-- Play Sound
+		audio.play(sounds.boom)	
+		-- We can't remove a body inside a collision event, so queue it to removal.
+		-- It will be removed on the next frame inside the game loop.
+		local explosion = createExplosion.create(event.other, "images/explosion.png", 24,23,8)
+		display.remove(event.other)
+		display.remove(self)
 
 		
 	-- Player collision - GAME OVER	
@@ -205,7 +216,7 @@ function scene:create( event )
 			-- based on a random range and last spawn (timeLastBarrier)
 			if event.time - timeLastBarrier >= math.random(600, 1000) then
 				-- Randomly position it on the top of the screen
-				local barrier = display.newImage("images/meteoro1.png")
+				local barrier = display.newImage("images/meteoro2.png")
 				barrier.x = display.contentWidth + barrier.contentHeight
 				barrier.y = math.random(0, display.contentHeight)
 
