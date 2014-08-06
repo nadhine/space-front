@@ -136,6 +136,20 @@ local function onCollision(self, event)
 		display.remove(event.other)
 		display.remove(self)
 		
+	elseif self.name == "ebullet" and event.other.name == "barrier" or self.name == "ebullet" and event.other.name == "enemy" and gameIsActive then
+		display.remove(self)
+		
+		
+	elseif self.name == "bulletP2" and event.other.name == "enemy" and gameIsActive or self.name == "bulletP2" and event.other.name == "barrier" and gameIsActive then
+		-- Not Increase score
+		-- Play Sound
+		audio.play(sounds.boom)	
+		-- We can't remove a body inside a collision event, so queue it to removal.
+		-- It will be removed on the next frame inside the game loop.
+		local explosion = createExplosion.create(event.other, "images/explosion.png", 24,23,8)
+		display.remove(event.other)
+		display.remove(self)
+		
 	-- Player collision - GAME OVER	
 	elseif self.name == "player" and event.other.name == "enemy" or self.name == "player" and event.other.name == "barrier" or self.name == "player" and event.other.name == "ebullet" then
 		local explosion = createExplosion.create(self, "images/explosion.png", 24,23,8)
@@ -238,22 +252,22 @@ function scene:create( event )
 					
 
 				--COLOCAR AQUI AS FUNÇOES DE CRIAR AS BALAS E O JOGADOR 2
-				local bullet = display.newImage("images/tiro1.png")
-				bullet.x = packReceived["bulletX"] + player.contentWidth *0.5
-				bullet.y = packReceived["bulletY"]
-				physics.addBody(bullet, "dynamic", {density=1000, bounce = 0, friction = 0})
-				bullet.name = "bullet"
-				bullet.isBullet = true
-				bullet:setLinearVelocity( 800,0 )
-				bullet.collision = onCollision
-				bullet:addEventListener("collision", bullet)
+				local bulletP2 = display.newImage("images/tiro3.png")
+				bulletP2.x = packReceived["bulletX"] + player.contentWidth *0.5
+				bulletP2.y = packReceived["bulletY"]
+				physics.addBody(bulletP2, "dynamic", {density=1000, bounce = 0, friction = 0})
+				bulletP2.name = "bulletP2"
+				bulletP2.isBullet = true
+				bulletP2:setLinearVelocity( 800,0 )
+				bulletP2.collision = onCollision
+				bulletP2:addEventListener("collision", bulletP2)
 
-				gameLayer:insert(bullet)
+				gameLayer:insert(bulletP2)
 				audio.play(sounds.pew)
 				
 				-- When the movement is complete, it will remove itself: the onComplete event
 				-- creates a function to will store information about this bullet and then remove it.
-				transition.to(bullet, {time = 1000, x =  packReceived["bulletX"] + 400,
+				transition.to(bulletP2, {time = 1000, x =  packReceived["bulletX"] + 400,
 					onComplete = function(self) if self.parent then self.parent:remove(self); self = nil; end end
 				})
 				
@@ -262,7 +276,7 @@ function scene:create( event )
 			end
 			if event.time - timeLastBarrier >= math.random(600, 1000) then
 				-- Randomly position it on the top of the screen
-				local barrier = display.newImage("images/meteoro1.png")
+				local barrier = display.newImage("images/meteoro2.png")
 				barrier.x = display.contentWidth + barrier.contentHeight
 				barrier.y = math.random(0, display.contentHeight)
 

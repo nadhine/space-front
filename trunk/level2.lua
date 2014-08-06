@@ -124,6 +124,9 @@ local function onCollision(self, event)
 		display.remove(event.other)
 		display.remove(self)
 		
+	elseif self.name == "ebullet" and event.other.name == "barrier" or self.name == "ebullet" and event.other.name == "enemy" and gameIsActive then
+		display.remove(self)
+
 	-- Player collision - GAME OVER	
 	elseif self.name == "player" and event.other.name == "enemy" or self.name == "player" and event.other.name == "barrier" or self.name == "player" and event.other.name == "ebullet" then
 		local explosion = createExplosion.create(self, "images/explosion.png", 24,23,8)
@@ -184,7 +187,7 @@ function scene:create( event )
 	
 	tableEnemies2 = enemyPosition.stage2b()
 	for key,v in pairs(tableEnemies2) do		
-		enemy = createEnemies.create("images/inimigo2-2.png", (v[1]), (v[2]), 3000)
+		enemy = createEnemies.create("images/inimigo2-2.png", (v[1]), (v[2]), 2000)
 		enemiesLayer:insert(enemy)
 		gameLayer:insert(enemy)
 		enemies[cont] = enemy
@@ -194,7 +197,7 @@ function scene:create( event )
 	end
 	tableEnemies3 = enemyPosition.stage2c()
 	for key,v in pairs(tableEnemies3) do		
-		enemy = createEnemies.create("images/inimigo-2-3.png", (v[1]), (v[2]), 3000)
+		enemy = createEnemies.create("images/inimigo-2-3.png", (v[1]), (v[2]), 10000)
 		enemiesLayer:insert(enemy)
 		gameLayer:insert(enemy)
 		enemies[cont] = enemy
@@ -213,11 +216,11 @@ function scene:create( event )
 			vidas.minhaVida()
 			-- Check if it's time to spawn another enemy,
 			-- based on a random range and last spawn (timeLastBarrier)
-			if event.time - timeLastBarrier >= math.random(2600, 3000) then
+			if event.time - timeLastBarrier >= math.random(2100, 3000) then
 				-- Randomly position it on the top of the screen
 				local barrier = display.newImage("images/coral.png")
 				barrier.x = display.contentWidth + barrier.contentHeight
-				barrier.y = 220
+				barrier.y = 240
 
 				physics.addBody(barrier, "dynamic", {density=10000, bounce = 0, friction = 0})
 				barrier.name = "barrier"
@@ -306,6 +309,7 @@ function scene:show( event )
 			print( "1: show event, phase did level1" )
 			sceneGroup.isVisible = true
 			composer.removeScene( "gameover" )
+			composer.removeScene( "fimdefase" )
 	end	
 end
 

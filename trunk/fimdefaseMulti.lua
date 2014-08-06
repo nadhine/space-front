@@ -15,9 +15,9 @@ require ("multiplayerFunctions");
 
 print( "fimdefaseMulti.lua has been loaded." )
 
-local score = 0
 local level = globals.fase
-local gameIsActive = true
+local gameIsActive = false
+local score = globals.score
 
 ----back to menu
 local function menuBtnRelease()
@@ -40,7 +40,7 @@ local function maisVidaBtnRelease()
 	if globals.score > 50 then
 		globals.vida = globals.vida + 1
 		globals.score = globals.score - 50
-		local score = globals.score
+		score = globals.score
 		vidas.minhaVida()
 	end
 	return true	-- indicates successful touch
@@ -50,7 +50,7 @@ local function doacaoBtnRelease()
 	-- go to fimdefase.lua scene
 	if globals.score >  50 then
 		globals.score = globals.score - 50
-		
+		score = globals.score
 	end
 	return true	-- indicates successful touch
 end
@@ -77,20 +77,15 @@ function scene:create( event )
 	local gameoverText = display.newText("Fim de Fase!", 0, 0, nil, 35)
 		gameoverText.x = display.contentCenterX
 		gameoverText.y = display.contentCenterY - 120
-		sceneGroup:insert(gameoverText)
 		
-	local score = globals.score
-	local ptsText = display.newText(" Sua Pontuação: "..score, 0, 0, nil, 15)
-		ptsText.x = 90
-		ptsText.y = 100
+	local scoreText = display.newText("Pontuação: "..score, 0, 0, nil, 15)
+		scoreText.x = 90
+		scoreText.y = 100
 		
-	local ptsPLayer2Text = display.newText(" P2: "..score, 0, 0, nil, 15)
+	local ptsPLayer2Text = display.newText(" P2: "..globals.scoreP2, 0, 0, nil, 15)
 		ptsPLayer2Text.x = 90
 		ptsPLayer2Text.y = 150
 		
-	local numericField = native.newTextField( 275, 150, 150, 40 )
-		numericField.inputType = "number"
-		numericField:addEventListener( "userInput", handlerFunction )	
 		
 	local maisVidaBtn = widget.newButton{
 		labelColor = { default={255}, over={128} },
@@ -99,18 +94,18 @@ function scene:create( event )
 		width=150, height=40,
 		onRelease = maisVidaBtnRelease	-- event listener function
 		}
-		maisVidaBtn.x =  275
+		maisVidaBtn.x =  240
 		maisVidaBtn.y =  100
 	
 	local doacaoBtn = widget.newButton{
 		labelColor = { default={255}, over={128} },
 		defaultFile="images/doacaoBtn.png",
 		overFile="images/doacaoBtn.png",
-		width=20, height=40,
+		width=150, height=40,
 		onRelease = doacaoBtnRelease	-- event listener function
 		}
-		doacaoBtn.x =  numericField.x - 100
-		doacaoBtn.y =  numericField.y
+		doacaoBtn.x = 240
+		doacaoBtn.y =  150
 		
 	local menuBtn = widget.newButton{
 		labelColor = { default={255}, over={128} },
@@ -137,21 +132,13 @@ function scene:create( event )
 		-- all display objects must be inserted into group
 		sceneGroup:insert( background )
 		sceneGroup:insert( gameoverText )
-		sceneGroup:insert( ptsText)
+		sceneGroup:insert( scoreText)
 		sceneGroup:insert( menuBtn )
 		sceneGroup:insert( restartBtn )
 		sceneGroup:insert( maisVidaBtn )
 		sceneGroup:insert( doacaoBtn )
-		sceneGroup:insert( numericField )
+		sceneGroup:insert( ptsPLayer2Text )
 		
-	-- local function gameLoop(event)
-		-- if gameIsActive then
-			-- if handlerFunction then
-				-- sendMessage()
-			-- end
-		-- end
-	-- end
-		-- Runtime:addEventListener("enterFrame", gameLoop)
 end
 
 
