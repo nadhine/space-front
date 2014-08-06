@@ -13,9 +13,9 @@ local globals = require( "globals" )
 -- -------------------------------------------------------------------------------
 
 print( "fimdefase.lua has been loaded." )
-
-local score = 0
+local score = globals.score
 local level = globals.fase
+local nextFase = globals.nextfase
 
 ----back to menu
 local function menuBtnRelease()
@@ -33,6 +33,11 @@ local function restartBtnRelease()
 	return true	-- indicates successful touch
 end
 
+local function nextBtnRelease()
+	-- go to fimdefase.lua scene
+	composer.gotoScene( nextFase, "fade", 50  )
+	return true	-- indicates successful touch
+end
 -- "scene:create()"
 function scene:create( event )
 	print( "1: create scene fimdefase" )
@@ -48,7 +53,6 @@ function scene:create( event )
 		gameoverText.y = display.contentCenterY -100
 		sceneGroup:insert(gameoverText)
 		
-	local score = globals.score
 	local ptsText = display.newText("Pontuação: "..score, 0, 0, nil, 15)
 		ptsText.x = display.contentCenterX 
 		ptsText.y = display.contentCenterY
@@ -61,7 +65,7 @@ function scene:create( event )
 		width=154, height=40,
 		onRelease = menuBtnRelease	-- event listener function
 		}
-		menuBtn.x =  240
+		menuBtn.x =  140
 		menuBtn.y =  230
 		
 	local restartBtn = widget.newButton{
@@ -71,8 +75,18 @@ function scene:create( event )
 		width=154, height=40,
 		onRelease = restartBtnRelease	-- event listener function
 		}
-		restartBtn.x =  240
+		restartBtn.x =  140
 		restartBtn.y =  290
+		
+	local nextBtn = widget.newButton{
+		labelColor = { default={255}, over={128} },
+		defaultFile="images/botaonext.png",
+		overFile="images/botaonext2.png",
+		width=154, height=40,
+		onRelease = nextBtnRelease	-- event listener function
+		}
+		nextBtn.x =  340
+		nextBtn.y =  290
 		
 		-- all display objects must be inserted into group
 		sceneGroup:insert( background )
@@ -80,6 +94,7 @@ function scene:create( event )
 		sceneGroup:insert( ptsText)
 		sceneGroup:insert( menuBtn )
 		sceneGroup:insert( restartBtn )
+		sceneGroup:insert( nextBtn )
 end
 
 

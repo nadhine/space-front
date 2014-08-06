@@ -112,6 +112,7 @@ local function onCollision(self, event)
 		-- It will be removed on the next frame inside the game loop.
 		local explosion = createExplosion.create(event.other, "images/explosion.png", 24,23,8)
 		display.remove(event.other)
+		display.remove(self)
 	
 	elseif self.name == "bullet" and event.other.name == "barrier" and gameIsActive then
 		-- Increase score
@@ -124,6 +125,16 @@ local function onCollision(self, event)
 		-- It will be removed on the next frame inside the game loop.
 		local explosion = createExplosion.create(event.other, "images/explosion.png", 24,23,8)		
 		display.remove(event.other)
+		display.remove(self)
+
+	elseif self.name == "bullet" and event.other.name == "ebullet" and gameIsActive then
+		-- Play Sound
+		audio.play(sounds.boom)	
+		-- We can't remove a body inside a collision event, so queue it to removal.
+		-- It will be removed on the next frame inside the game loop.
+		local explosion = createExplosion.create(event.other, "images/explosion.png", 24,23,8)
+		display.remove(event.other)
+		display.remove(self)
 		
 	-- Player collision - GAME OVER	
 	elseif self.name == "player" and event.other.name == "enemy" or self.name == "player" and event.other.name == "barrier" or self.name == "player" and event.other.name == "ebullet" then

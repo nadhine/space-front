@@ -42,6 +42,13 @@ local function aboutBtnRelease()
 	return true	-- indicates successful touch
 end
 
+local function highBtnRelease()
+	
+	-- go to about.lua scene
+	composer.gotoScene( "highscores", "fade", 500 )
+	
+	return true	-- indicates successful touch
+end
 function scene:create( event )
 	local sceneGroup = self.view
 
@@ -95,12 +102,22 @@ function scene:create( event )
 	aboutBtn.x =  380
 	aboutBtn.y =  200
 	
+	highBtn = widget.newButton{
+	labelColor = { default={255}, over={128} },
+	defaultFile="images/highscoresBtn.png",
+	overFile="images/highscoresBtn.png",
+	onRelease = highBtnRelease	-- event listener function
+	}
+	highBtn.x =  380
+	highBtn.y =  40
+	
 	-- all display objects must be inserted into group
 	sceneGroup:insert( background )
 	sceneGroup:insert( titleLogo )
 	sceneGroup:insert( playBtn )
 	sceneGroup:insert(multiPlayBtn)
 	sceneGroup:insert(aboutBtn)
+	sceneGroup:insert(highBtn)
 end
 
 function scene:show( event )
@@ -117,6 +134,7 @@ function scene:show( event )
 		audio.play (backgroundsnd, { loops = 1})
 		sceneGroup.isVisible = true
 		composer.removeScene( "about" )
+		composer.removeScene( "highscores" )
 		composer.removeScene( "gameover" )
 		composer.removeScene( "selectRoom" )
 		composer.removeScene( level )

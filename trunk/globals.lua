@@ -4,6 +4,7 @@ local this = {}
 this.score = 0
 this.isNew = false
 this.fase = ""
+this.nextfase = ""
 this.vida = 0
  
 -- Return globals module
