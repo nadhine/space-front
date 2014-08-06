@@ -133,6 +133,9 @@ local function onCollision(self, event)
 		local explosion = createExplosion.create(event.other, "images/explosion.png", 24,23,8)
 		display.remove(event.other)
 		display.remove(self)
+		
+	elseif self.name == "ebullet" and event.other.name == "barrier" or self.name == "ebullet" and event.other.name == "enemy" and gameIsActive then
+		display.remove(self)
 
 		
 	-- Player collision - GAME OVER	
