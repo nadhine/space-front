@@ -1,5 +1,6 @@
 require "pubnub"
 require "math"
+local globals = require( "globals" )
 
 
 function generateId()
@@ -7,7 +8,7 @@ function generateId()
     return id;
 end
 
-playerId = 1
+playerId = globals.playerId
 
 multiplayer = pubnub.new({
     publish_key = "pub-c-a585bb6f-5131-4fed-b4b7-a158a38cff38", -- YOUR PUBLISH KEY
