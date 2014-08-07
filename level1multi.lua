@@ -238,7 +238,7 @@ function scene:create( event )
 					-- Add a physics body. It is kinematic, so it doesn't react to gravity.
 					physics.addBody(player2, "kinematic", {bounce = 0})
 					-- This is necessary so we know who hit who when taking care of a collision event
-					player2.name = "player"
+					player2.name = "player2"
 					-- Listen to collisions
 					player2.collision = onCollision
 					player2:addEventListener("collision", player2)
