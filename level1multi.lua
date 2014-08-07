@@ -43,7 +43,7 @@ local background
 local player
 local halfPlayerWidth
 local resist = 0
-
+local player2 = nil
 
 local landscape = display.newImageRect( "images/fase1.png", 3963, 320 )
 -- landscape:setReferencePoint( display.TopLeftReferencePoint )
@@ -236,7 +236,7 @@ function scene:create( event )
 					player2.y = packReceived["bulletY"]
 					player2.x = packReceived["bulletX"]
 					-- Add a physics body. It is kinematic, so it doesn't react to gravity.
-					physics.addBody(player, "kinematic", {bounce = 0})
+					physics.addBody(player2, "kinematic", {bounce = 0})
 					-- This is necessary so we know who hit who when taking care of a collision event
 					player2.name = "player"
 					-- Listen to collisions
@@ -249,7 +249,7 @@ function scene:create( event )
 					player2.x = packReceived["bulletX"]
 					player2.y = packReceived["bulletY"]
 				end
-					
+				
 
 				--COLOCAR AQUI AS FUNÇOES DE CRIAR AS BALAS E O JOGADOR 2
 				local bulletP2 = display.newImage("images/tiro3.png")
@@ -261,6 +261,8 @@ function scene:create( event )
 				bulletP2:setLinearVelocity( 800,0 )
 				bulletP2.collision = onCollision
 				bulletP2:addEventListener("collision", bulletP2)
+				-- insert the pontuation player2
+				globals.scoreP2 = packReceived["pontuation"]
 
 				gameLayer:insert(bulletP2)
 				audio.play(sounds.pew)
@@ -318,11 +320,12 @@ function scene:create( event )
 			
 				-- before of create the bullet in stage, send to pubnub for the other player see the bullet
 				local protoBullet = {}
-				protoBullet["playerId"] = playerId
+				protoBullet["playerId"] = globals.playerId
 				protoBullet["bulletX"] = bullet.x
 				protoBullet["bulletY"] = bullet.y
 				protoBullet["room"]    = "sala1"
 				protoBullet["protocolo"] = "positionPlayerBullet"
+				protoBullet["pontuation"] = globals.score
 				sendMessage(protoBullet)
 
 				gameLayer:insert(bullet)

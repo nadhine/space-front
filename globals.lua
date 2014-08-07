@@ -7,6 +7,6 @@ this.isNew = false
 this.fase = ""
 this.nextfase = ""
 this.vida = 0
- 
+this.playerId = 1
 -- Return globals module
 return this
